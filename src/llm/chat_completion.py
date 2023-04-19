@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
-import json
 import openai
 import os
+
+from console import console
 
 def setup():
     load_dotenv()
@@ -28,26 +29,28 @@ def compose(system, examples, user):
 
 def chat_completion(system, examples, user):
     try:
-        # TODO temp=0 and other params
-        # TODO count tokens (complete rewrite with direct requests?)
         messages = compose(system, examples, user)
 
-        # print(json.dumps(user, indent=4)) # if verbose
+        # TODO count tokens (complete rewrite with direct requests?) and use max_tokens=
 
         completion = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
+            temperature=0, # based on HuggingGPT
+            # best_of
+            # n
+            # frequency_penalty ?
         )
         return completion.choices[0].message.content
     except openai.error.APIError as e:
-        print(f"OpenAI API returned an API Error: {e}")
+        console.error(f"(llm) OpenAI API returned an API Error: {e}")
         pass
     except openai.error.APIConnectionError as e:
-        print(f"Failed to connect to OpenAI API: {e}")
+        console.error(f"(llm) Failed to connect to OpenAI API: {e}")
         pass
     except openai.error.RateLimitError as e:
-        print(f"OpenAI API request exceeded rate limit: {e}")
+        console.error(f"(llm) OpenAI API request exceeded rate limit: {e}")
         pass
     except Exception as e:
-        print(f"Unknown error: {e}")
+        console.error(f"(llm) {e.__class__.__name__}: {e}")
         pass

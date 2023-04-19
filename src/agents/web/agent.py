@@ -1,18 +1,14 @@
 # agent with the ability to search and access webpages
-from rich.console import Console
+from console import console
 
+from agents import relevence_summary_agent
 from llm import chat_completion
 from utils import duckduckgo, web_request
 
-from .prompts import system, examples, user, user_context, refine_search
-
-console = Console()
+from .prompts import system, examples, user, user_context
 
 SYSTEM = system()
 EXAMPLES = examples()
-
-def send_completion(user_prompt):
-    return chat_completion(SYSTEM, EXAMPLES, user_prompt)
 
 class PromptBuilder:
     def __init__(self, agent):
@@ -28,7 +24,7 @@ class WebAgent:
     def __init__(self, query):
         self.query = query
         self.context_items = []
-        self.prompt = PromptBuilder(self)
+        self.user_prompt = PromptBuilder(self)
 
     def clear_context(self):
         self.context_items = []
@@ -39,50 +35,65 @@ class WebAgent:
         return self
 
     def prediction(self):
-        return send_completion(self.prompt())
+        console.log('(WebAgent) Getting prediction...')
+
+        console.verbose([ (action, action_input, result) for (action, action_input, result) in self.context_items ])
+
+        prediction = chat_completion(SYSTEM, EXAMPLES, self.user_prompt())
+
+        if not prediction:
+            console.error("(WebAgent) Fail: Couldn't get LLM prediction")
+        else:
+            console.log(prediction) # verbose?
+
+        return prediction
 
 def parse_output(output):
     lines = output.split("\n")
     final = lines[-1]
     if final.startswith("Answer:"):
-        return "Answer", final[len("Answer: "):].strip()
+        return "Answer", final[len("Answer:"):].strip()
     elif final.startswith("WebSearch:"):
-        return "WebSearch", final[len("WebSearch: "):].strip()
+        return "WebSearch", final[len("WebSearch:"):].strip()
     elif final.startswith("WebAccess:"):
-        return "WebAccess", final[len("WebAccess: "):].strip()
+        return "WebAccess", final[len("WebAccess:"):].strip()
     else:
-        return False
+        console.error(f"Fail: Couldn't parse LLM output")
+        return False, ""
 
 def run_agent(web_agent):
     # get prediction
     prediction = web_agent.prediction()
-    
-    console.log(prediction) # if verbose
+
+    if not prediction:
+        return None # TODO try again if < max_iterations
 
     # parse
     action, action_input = parse_output(prediction)
 
-    console.print(f"[bold]{action}:[/] {action_input}")
+    if not action:
+        return None # TODO try again if < max_iterations
+
+    console.log(f"[bold]Action: {action}[/] ({action_input})")
 
     # return answer if we have it
     if action == "Answer":
         return action_input
 
-    # else, take next step
+    # else, invoke action
     if action == "WebSearch":
         result = duckduckgo(action_input)
     elif action == "WebAccess":
-        result = web_request(action_input)
-        result = chat_completion(
-            "You're a helpful summarizing agent.", 
-            [], 
-            refine_search(web_agent.query, result)
-        )
+        web_request_result = web_request(action_input)
+        result = relevence_summary_agent(web_agent.query, web_request_result)
+        if not result:
+            return None # TODO try again (if < max_iterations) ?
 
+    # take next step
     web_agent.add_to_context(action, action_input, result)
     return run_agent(web_agent)
 
 def agent(query):
-    agent = WebAgent(query)
-    with console.status("[bold green]Working on tasks...") as status:
-        return run_agent(agent)
+    web_agent = WebAgent(query)
+    with console.status("[bold green]Executing Agent: WebInformed...[/]"):
+        return run_agent(web_agent)

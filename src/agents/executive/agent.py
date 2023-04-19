@@ -2,7 +2,7 @@ from llm import chat_completion
 from tasks import task_dictionary, task_prompt_segment
 
 from .prompts import system, examples, user
-from .verify_plan import verify_plan
+from . import verify_plan
 
 def agent(query):
     plan = chat_completion(
