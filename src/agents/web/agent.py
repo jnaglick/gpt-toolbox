@@ -91,9 +91,12 @@ def run_agent(web_agent):
 
     # take next step
     web_agent.add_to_context(action, action_input, result)
-    return run_agent(web_agent)
+    return run_agent_with_status(web_agent)
+
+def run_agent_with_status(web_agent):
+    with console.status("[bold green]Executing Agent: WebInformed...[/]"):
+        return run_agent(web_agent)
 
 def agent(query):
     web_agent = WebAgent(query)
-    with console.status("[bold green]Executing Agent: WebInformed...[/]"):
-        return run_agent(web_agent)
+    return run_agent_with_status(web_agent)
