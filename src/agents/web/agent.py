@@ -1,9 +1,12 @@
 # agent with the ability to search and access webpages
+from rich.console import Console
 
 from llm import chat_completion
 from utils import duckduckgo, web_request
 
-from .prompt import system, examples, user, user_context, refine_search
+from .prompts import system, examples, user, user_context, refine_search
+
+console = Console()
 
 SYSTEM = system()
 EXAMPLES = examples()
@@ -15,10 +18,11 @@ class PromptBuilder:
     def __init__(self, agent):
         self.agent = agent
 
+    def user_context(self):
+        return user_context(self.agent.context_items[::-1])
+
     def __call__(self):
-        query = self.agent.query
-        context = user_context(self.agent.context_items[::-1])
-        return user(query, context)
+        return user(self.agent.query, self.user_context())
 
 class WebAgent:
     def __init__(self, query):
@@ -53,10 +57,12 @@ def run_agent(web_agent):
     # get prediction
     prediction = web_agent.prediction()
     
-    print(prediction) # if verbose
+    console.log(prediction) # if verbose
 
     # parse
     action, action_input = parse_output(prediction)
+
+    console.print(f"[bold]{action}:[/] {action_input}")
 
     # return answer if we have it
     if action == "Answer":
@@ -78,4 +84,5 @@ def run_agent(web_agent):
 
 def agent(query):
     agent = WebAgent(query)
-    return run_agent(agent)
+    with console.status("[bold green]Working on tasks...") as status:
+        return run_agent(agent)

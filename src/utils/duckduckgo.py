@@ -22,4 +22,4 @@ def duckduckgo(search_term):
     search_result_titles = soup.select('#links.results .result__title')
     titles = [title.get_text(strip=True) for title in search_result_titles]
 
-    return list(zip(titles, urls))[0:4]
+    return list(zip(titles, urls))[0:8]
