@@ -1,7 +1,6 @@
 # agent with the ability to search and access webpages
+from agents.few_shot.relevence_summary import relevence_summary
 from console import console
-
-from agents import relevence_summary_agent
 from llm import chat_completion
 from utils import duckduckgo, web_request
 
@@ -35,21 +34,21 @@ class WebAgent:
         return self
 
     def prediction(self):
-        console.log('(WebAgent) Getting prediction...')
+        console.log('(WebInformed) Getting prediction...')
 
         console.verbose([ (action, action_input, result) for (action, action_input, result) in self.context_items ])
 
         prediction = chat_completion(SYSTEM, EXAMPLES, self.user_prompt())
 
         if not prediction:
-            console.error("(WebAgent) Fail: Couldn't get LLM prediction")
+            console.error("(WebInformed) Fail: Couldn't get LLM prediction")
         else:
             console.log(prediction) # verbose?
 
         return prediction
 
-def parse_output(output):
-    lines = output.split("\n")
+def parse_prediction(prediction):
+    lines = prediction.strip().split("\n")
     final = lines[-1]
     if final.startswith("Answer:"):
         return "Answer", final[len("Answer:"):].strip()
@@ -61,42 +60,44 @@ def parse_output(output):
         console.error(f"Fail: Couldn't parse LLM output")
         return False, ""
 
-def run_agent(web_agent):
-    # get prediction
-    prediction = web_agent.prediction()
-
-    if not prediction:
-        return None # TODO try again if < max_iterations
-
-    # parse
-    action, action_input = parse_output(prediction)
-
-    if not action:
-        return None # TODO try again if < max_iterations
-
-    console.log(f"[bold]Action: {action}[/] ({action_input})")
-
-    # return answer if we have it
-    if action == "Answer":
-        return action_input
-
-    # else, invoke action
+def exec_action(web_agent, action, action_input):
     if action == "WebSearch":
-        result = duckduckgo(action_input)
-    elif action == "WebAccess":
+        return duckduckgo(action_input)
+
+    if action == "WebAccess":
         web_request_result = web_request(action_input)
-        result = relevence_summary_agent(web_agent.query, web_request_result)
-        if not result:
+        return relevence_summary(web_agent.query, web_request_result)
+
+def run_agent(web_agent):
+    with console.status("[bold green]Executing Agent: WebInformed...[/]"): # TODO decorator
+        # get prediction
+        prediction = web_agent.prediction()
+
+        if not prediction:
+            return None # TODO try again if < max_iterations
+
+        # parse
+        action, action_input = parse_prediction(prediction)
+
+        if not action:
+            return None # TODO try again if < max_iterations
+
+        console.log(f"[bold]Action: {action}[/] ({action_input})")
+
+        # return answer if we have it
+        if action == "Answer":
+            return action_input
+
+        # else, invoke action
+        action_result = exec_action(web_agent, action, action_input)
+
+        if not action_result:
             return None # TODO try again (if < max_iterations) ?
 
-    # take next step
-    web_agent.add_to_context(action, action_input, result)
-    return run_agent_with_status(web_agent)
-
-def run_agent_with_status(web_agent):
-    with console.status("[bold green]Executing Agent: WebInformed...[/]"):
+        # take next step (update context and iterate)
+        web_agent.add_to_context(action, action_input, action_result)
         return run_agent(web_agent)
 
 def agent(query):
     web_agent = WebAgent(query)
-    return run_agent_with_status(web_agent)
+    return run_agent(web_agent)

@@ -10,7 +10,7 @@ LogLevel = {
 # TODO get log level from dotenv
 
 class Console(RichConsole):
-    def __init__(self, *args, log_level='NORMAL', **kwargs):
+    def __init__(self, *args, log_level='VERBOSE', **kwargs):
         super().__init__(*args, **kwargs)
 
         self.log_level = log_level

@@ -11,7 +11,7 @@ def make_request(search_term):
     response = requests.get(url, headers=headers)
     return response.text
 
-def duckduckgo(search_term):
+def duckduckgo(search_term, num_results=3):
     response = make_request(search_term)
 
     soup = BeautifulSoup(response, 'html.parser')
@@ -22,4 +22,4 @@ def duckduckgo(search_term):
     search_result_titles = soup.select('#links.results .result__title')
     titles = [title.get_text(strip=True) for title in search_result_titles]
 
-    return list(zip(titles, urls))[0:8]
+    return list(zip(titles, urls))[0:num_results]
