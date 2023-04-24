@@ -1,4 +1,4 @@
-from . import user, user_context
+from . import user
 
 def example_previous(previous):
     return f"""
@@ -44,11 +44,11 @@ def examples():
       [
         user(
           "What is the weather in New York?", 
-          user_context([[
+          [[
             "WebSearch", 
             "current weather new york", 
             "[('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city')]"
-          ]])
+          ]]
         ),
         "\n".join([
           example_previous(
@@ -62,14 +62,16 @@ def examples():
       ],
       [
         user(
-          "What is the weather in New York?", 
-          """
-WebAccess: https://www.accuweather.com/en/us/new-york/10021/current-weather/349727
-Results: Access Denied
-|||||
-WebSearch: current weather new york
-Results: [('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city')]
-          """.strip()
+          "What is the weather in New York?",
+          [[
+            "WebAccess",
+            "https://www.accuweather.com/en/us/new-york/10021/current-weather/349727",
+            "Access Denied"
+          ],[
+            "WebSearch", 
+            "current weather new york", 
+            "[('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city')]"
+          ]]
         ),
         "\n".join([
           example_previous(
@@ -84,23 +86,28 @@ Results: [('New York, NY Current Weather | AccuWeather', 'https://www.accuweathe
       [
         user(
           "What is the weather in New York?", 
-          """
-WebAccess: https://www.wunderground.com/weather/us/ny/new-york-city
-Results: New York City Feels like 68 F Clear Alerts
-|||||
-WebAccess: https://www.accuweather.com/en/us/new-york/10021/current-weather/349727
-Results: Access Denied
-|||||
-WebSearch: current weather new york
-Results: [('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city')]
-          """.strip()
+          [[
+            "WebAccess",
+            "https://www.wunderground.com/weather/us/ny/new-york-city",
+            "New York City Feels like 68 F Clear Alerts"
+          ],[
+            "WebAccess",
+            "https://www.accuweather.com/en/us/new-york/10021/current-weather/349727",
+            "Access Denied"
+          ],[
+            "WebSearch", 
+            "current weather new york", 
+            "[('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city')]"
+          ]]
         ),
-        example_previous(
-          "WebAccess: https://www.wunderground.com/weather/us/ny/new-york-city, WebAccess: https://www.accuweather.com/en/us/new-york/10021/current-weather/349727, WebSearch: current weather new york"
-        ),
-        example_thought(
-          "I hav enough information to answer the user's query in the context."
-        ),
-        example_answer("The current temperature in New York is 64 degrees Fahrenheit.")
+        "\n".join([
+          example_previous(
+            "WebAccess: https://www.wunderground.com/weather/us/ny/new-york-city, WebAccess: https://www.accuweather.com/en/us/new-york/10021/current-weather/349727, WebSearch: current weather new york"
+          ),
+          example_thought(
+            "I have enough information to answer the user's query in the context."
+          ),
+          example_answer("The current temperature in New York is 64 degrees Fahrenheit.")        
+        ])
       ],
     ]

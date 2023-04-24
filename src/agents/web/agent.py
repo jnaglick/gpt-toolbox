@@ -4,7 +4,7 @@ from console import console
 from llm import chat_completion
 from utils import duckduckgo, web_request
 
-from .prompts import system, examples, user, user_context
+from .prompts import system, examples, user
 
 SYSTEM = system()
 EXAMPLES = examples()
@@ -13,17 +13,14 @@ class PromptBuilder:
     def __init__(self, agent):
         self.agent = agent
 
-    def user_context(self):
-        return user_context(self.agent.context_items[::-1])
-
     def __call__(self):
-        return user(self.agent.query, self.user_context())
+        return user(self.agent.query, self.agent.context_items[::-1])
 
 class WebAgent:
     def __init__(self, query):
         self.query = query
         self.context_items = []
-        self.user_prompt = PromptBuilder(self)
+        self.prompt = PromptBuilder(self)
 
     def clear_context(self):
         self.context_items = []
@@ -38,7 +35,7 @@ class WebAgent:
 
         console.verbose([ (action, action_input, result) for (action, action_input, result) in self.context_items ])
 
-        prediction = chat_completion(SYSTEM, EXAMPLES, self.user_prompt())
+        prediction = chat_completion(SYSTEM, EXAMPLES, self.prompt())
 
         if not prediction:
             console.error("(WebInformed) Fail: Couldn't get LLM prediction")
