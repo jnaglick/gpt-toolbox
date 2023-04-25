@@ -9,22 +9,10 @@ from .prompts import system, examples, user
 SYSTEM = system()
 EXAMPLES = examples()
 
-class PromptBuilder:
-    def __init__(self, agent):
-        self.agent = agent
-
-    def __call__(self):
-        return user(self.agent.query, self.agent.context_items[::-1])
-
 class WebAgent:
     def __init__(self, query):
         self.query = query
         self.context_items = []
-        self.prompt = PromptBuilder(self)
-
-    def clear_context(self):
-        self.context_items = []
-        return self
 
     def add_to_context(self, action, action_input, result):
         self.context_items.append((action, action_input, result))
@@ -33,9 +21,10 @@ class WebAgent:
     def prediction(self):
         console.log('(WebInformed) Getting prediction...')
 
-        console.verbose([ (action, action_input, result) for (action, action_input, result) in self.context_items ])
+        console.verbose(self.context_items)
 
-        prediction = chat_completion(SYSTEM, EXAMPLES, self.prompt())
+        prompt = user(self.query, self.context_items[::-1])
+        prediction = chat_completion(SYSTEM, EXAMPLES, prompt)
 
         if not prediction:
             console.error("(WebInformed) Fail: Couldn't get LLM prediction")
@@ -57,13 +46,19 @@ def parse_prediction(prediction):
         console.error(f"Fail: Couldn't parse LLM output")
         return False, ""
 
+def get_relevence_summary(query, url):
+    web_request_result = web_request(url)
+    return relevence_summary(query, web_request_result)
+
 def exec_action(web_agent, action, action_input):
     if action == "WebSearch":
-        return duckduckgo(action_input)
+        results = duckduckgo(action_input)
+        return [
+            (result[0], result[1], get_relevence_summary(web_agent.query, result[1])) for result in results 
+        ]
 
     if action == "WebAccess":
-        web_request_result = web_request(action_input)
-        return relevence_summary(web_agent.query, web_request_result)
+        return get_relevence_summary(web_agent.query, action_input)
 
 def run_agent(web_agent):
     with console.status("[bold green]Executing Agent: WebInformed...[/]"): # TODO decorator
