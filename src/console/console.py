@@ -1,7 +1,8 @@
 from rich.console import Console as RichConsole
 
+from utils import env
+
 DEFAULT_LOG_LEVEL = 'VERBOSE'
-# TODO get log level from dotenv
 
 LogLevel = {
     'NONE': 0,
@@ -11,10 +12,10 @@ LogLevel = {
 }
 
 class Console(RichConsole):
-    def __init__(self, *args, log_level=DEFAULT_LOG_LEVEL, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.log_level = log_level
+        self.log_level = env["LOG_LEVEL"] or DEFAULT_LOG_LEVEL
         self.status_obj = None
         
         self._orig_log = self.log

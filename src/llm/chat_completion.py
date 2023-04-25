@@ -1,12 +1,10 @@
-from dotenv import load_dotenv
 import openai
-import os
 
 from console import console
+from utils import env
 
 def setup():
-    load_dotenv()
-    openai_api_key = os.getenv("OPENAI_API_KEY")
+    openai_api_key = env["OPENAI_API_KEY"]
     if not openai_api_key:
         raise ValueError("Put your OpenAI API key in the OPENAI_API_KEY environment variable.")
     openai.api_key = openai_api_key
