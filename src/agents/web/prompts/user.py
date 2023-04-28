@@ -1,13 +1,13 @@
-from .special_tokens import CONTEXT_ITEMS_SEPARATOR
+from .special_tokens import *
 
 def context_section(context_items):
-    return CONTEXT_ITEMS_SEPARATOR.join([
-        f"{action}: {action_input}\nResults: {result}"
+    return INPUT_SECTION_CONTEXT_ITEMS_SEPARATOR.join([
+        f"{action}: {action_input}\n{INPUT_SECTION_CONTEXT_ITEM_RESULT}: {result}"
         for (action, action_input, result) in context_items
     ])
 
 def user(question, context_items=[]): return f""" 
-CONTEXT:
+{INPUT_SECTION_CONTEXT}:
 {context_section(context_items)}
-QUESTION: {question}
+{INPUT_SECTION_QUESTION}: {question}
 """.strip()
