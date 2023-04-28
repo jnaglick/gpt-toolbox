@@ -17,12 +17,12 @@ Results: <result>
 QUESTION: <user question here>
 
 C. Your Output:
-{SECTION_PREVIOUS_ACTIONS}: <repeat the previous {SECTION_WEB_SEARCH} lines from the CONTEXT (comma sep). Do NOT ask for similar searches!>
-{SECTION_INTERNAL_THOUGHT}: <your thoughts (optional)>
-{SECTION_ENOUGH_INFO}: <"yes" or "no" - answer "Do I know the answer to the question without needing live information?">
+{SECTION_PREVIOUS_ACTIONS}:<repeat the previous {SECTION_WEB_SEARCH} lines from the CONTEXT (comma sep). Do NOT ask for similar searches! (if none, leave blank)>
+{SECTION_INTERNAL_THOUGHT}:<your reasoning about whether you know the answer to the question and/or what live information you need to answer it>
+{SECTION_ENOUGH_INFO}:<"yes" or "no" - answer "Do I know the answer to the question without needing live information?">
 (Finally, one of the following:)
-{SECTION_ANSWER}: <your complete answer>
-{SECTION_WEB_SEARCH}: <a search term for a web search, only if you need live information>
+{SECTION_ANSWER}:<your complete answer>
+{SECTION_WEB_SEARCH}:<a search term for a web search, only if you need live information>
 
 D. Most important instructions:
 1. Doing a {SECTION_WEB_SEARCH} has a high environmental cost! Carefully consider what {SECTION_WEB_SEARCH} are already in CONTEXT. *NEVER* put a {SECTION_WEB_SEARCH} in Your Output similar to one already in the CONTEXT!

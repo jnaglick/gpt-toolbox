@@ -8,7 +8,7 @@ class FewShotAgent:
     def __init__(self, agent_name):
         self.agent_name = agent_name
 
-    def parse_completion(self, completion, *args, **kwargs):
+    def handle_completion(self, completion, *args, **kwargs):
         return completion
 
     def prompt(self, query, *args, **kwargs):
@@ -31,7 +31,7 @@ class FewShotAgent:
             
             console.verbose(completion)
 
-            prediction = self.parse_completion(completion, *args, **kwargs)
+            prediction = self.handle_completion(completion, *args, **kwargs)
 
             if not prediction:
                 console.error(f"({self.agent_name}) Fail: Couldn't parse LLM completion")

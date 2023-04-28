@@ -3,24 +3,24 @@ from .special_tokens import *
 
 def example_previous(previous):
     return f"""
-{SECTION_PREVIOUS_ACTIONS}: {previous}
+{SECTION_PREVIOUS_ACTIONS}:{previous}
     """.strip()
 
 def example_thought(thought):
     return f"""
-{SECTION_INTERNAL_THOUGHT}: {thought}
+{SECTION_INTERNAL_THOUGHT}:{thought}
     """.strip()
 
 def example_answer(output):
     return f"""
-{SECTION_ENOUGH_INFO}: yes
+{SECTION_ENOUGH_INFO}:yes
 {SECTION_ANSWER}: {output}
     """.strip()
 
 def example_search(output):
     return f"""
-{SECTION_ENOUGH_INFO}: no
-{SECTION_WEB_SEARCH}: {output}
+{SECTION_ENOUGH_INFO}:no
+{SECTION_WEB_SEARCH}:{output}
     """.strip()
 
 def examples():
@@ -29,6 +29,8 @@ def examples():
         user(
           "Who was the 23rd president of the United States?"
         ),
+        example_previous(""),
+        example_thought("I know the answer to this question without needing live information."),
         example_answer(
           "Benjamin Harrison."
         )
@@ -37,6 +39,8 @@ def examples():
         user(
           "Where is the island of Java?"
         ),
+        example_previous(""),
+        example_thought("I know the answer to this question without needing live information."),
         example_answer(
           "Java is located in Southeast Asia and is part of Indonesia."
         )
@@ -46,6 +50,7 @@ def examples():
           "What is the weather in New York?"
         ),
         "\n".join([
+          example_previous(""),
           example_thought(
             "Answering this question requires live information, so I will need to search the web."
           ),
@@ -76,6 +81,7 @@ def examples():
           "What is the weather in New York and Who won the Academy Award for Best Picture in 2023?"
         ),
         "\n".join([
+          example_previous(""),
           example_thought(
             "Answering this question requires multiple searches, so I'll just pick one."
           ),
