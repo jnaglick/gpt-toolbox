@@ -25,19 +25,18 @@ def compose(system, examples, user):
         {"role": "user", "content": user},
     ]
 
-def chat_completion(system, examples, user):
+def chat_completion(system, examples, user, model="gpt-3.5-turbo"):
     try:
         messages = compose(system, examples, user)
 
         # TODO count tokens (complete rewrite with direct requests?) and use max_tokens=
 
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=model,
             messages=messages,
             temperature=0, # based on HuggingGPT
             # best_of
             # n
-            # frequency_penalty ?
         )
         return completion.choices[0].message.content
     except openai.error.APIError as e:

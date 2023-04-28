@@ -1,95 +1,51 @@
 # agent with the ability to search and access webpages
-from agents.few_shot.relevence_summary import relevence_summary
-from console import console
-from llm import chat_completion
+from agents.few_shot import FewShotAgent, RelevenceSummaryAgent
 from utils import duckduckgo, web_request
 
 from .prompts import system, examples, user
+from .prompts.special_tokens import *
 
-SYSTEM = system()
-EXAMPLES = examples()
-
-class WebAgent:
-    def __init__(self, query):
-        self.query = query
-        self.context_items = []
-
-    def add_to_context(self, action, action_input, result):
-        self.context_items.append((action, action_input, result))
-        return self
-
-    def prediction(self):
-        console.log('(WebInformed) Getting prediction...')
-
-        console.verbose(self.context_items)
-
-        prompt = user(self.query, self.context_items[::-1])
-        prediction = chat_completion(SYSTEM, EXAMPLES, prompt)
-
-        if not prediction:
-            console.error("(WebInformed) Fail: Couldn't get LLM prediction")
-        else:
-            console.log(prediction) # verbose?
-
-        return prediction
-
-def parse_prediction(prediction):
-    lines = prediction.strip().split("\n")
-    final = lines[-1]
-    if final.startswith("Answer:"):
-        return "Answer", final[len("Answer:"):].strip()
-    elif final.startswith("WebSearch:"):
-        return "WebSearch", final[len("WebSearch:"):].strip()
-    elif final.startswith("WebAccess:"):
-        return "WebAccess", final[len("WebAccess:"):].strip()
-    else:
-        console.error(f"Fail: Couldn't parse LLM output")
-        return False, ""
+relevence_summary_agent = RelevenceSummaryAgent("RelevenceSummary")
 
 def get_relevence_summary(query, url):
     web_request_result = web_request(url)
-    return relevence_summary(query, web_request_result)
+    return relevence_summary_agent.prediction(query, web_request_result)
 
-def exec_action(web_agent, action, action_input):
-    if action == "WebSearch":
-        results = duckduckgo(action_input)
-        return [
-            (result[0], result[1], get_relevence_summary(web_agent.query, result[1])) for result in results 
-        ]
+def handle_search_action(search_term):
+    search_results = duckduckgo(search_term, num_results=1)
+    return [
+        (title, url, get_relevence_summary(search_term, url)) for title, url in search_results 
+    ]
 
-    if action == "WebAccess":
-        return get_relevence_summary(web_agent.query, action_input)
+class WebAgent(FewShotAgent):
+    def __init__(self):
+        super().__init__("WebInformed")
+        self.context_items = []
 
-def run_agent(web_agent):
-    with console.status("[bold green]Executing Agent: WebInformed...[/]"): # TODO decorator
-        # get prediction
-        prediction = web_agent.prediction()
+    def add_to_context(self, action, action_input, action_result):
+        self.context_items.append((action, action_input, action_result))
+        return self
 
-        if not prediction:
-            return None # TODO try again if < max_iterations
+    def prompt(self, query):
+        return system(), examples(), user(query, self.context_items[::-1])
 
-        # parse
-        action, action_input = parse_prediction(prediction)
+    def parse_completion(self, completion, query):
+        lines = completion.strip().split("\n")
+        final = lines[-1]
 
-        if not action:
-            return None # TODO try again if < max_iterations
+        if final.startswith(f"{SECTION_ANSWER}:"):
+            return final[len(f"{SECTION_ANSWER}:"):].strip()
 
-        console.log(f"[bold]Action: {action}[/] ({action_input})")
+        elif final.startswith(f"{SECTION_WEB_SEARCH}:"):
+            search_term = final[len(f"{SECTION_WEB_SEARCH}:"):].strip()
+            action_result = handle_search_action(search_term)
+            self.add_to_context(SECTION_WEB_SEARCH, search_term, action_result)
+            return self.prediction(query)
 
-        # return answer if we have it
-        if action == "Answer":
-            return action_input
+        else:
+            return None
 
-        # else, invoke action
-        action_result = exec_action(web_agent, action, action_input)
-
-        if not action_result:
-            return None # TODO try again (if < max_iterations) ?
-
-        # take next step (update context and iterate)
-        web_agent.add_to_context(action, action_input, action_result)
-        return run_agent(web_agent)
+web_agent = WebAgent()
 
 def agent(query):
-    web_agent = WebAgent(query)
-    return run_agent(web_agent)
+    return web_agent.prediction(query)

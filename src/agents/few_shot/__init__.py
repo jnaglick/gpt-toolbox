@@ -1,2 +1,2 @@
 from .agent import FewShotAgent
-from .relevence_summary import relevence_summary
+from .relevence_summary import RelevenceSummaryAgent

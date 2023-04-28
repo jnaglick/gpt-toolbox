@@ -1,4 +1,4 @@
-CONTEXT_ITEMS_SEPARATOR = "|||||"
+from .special_tokens import CONTEXT_ITEMS_SEPARATOR
 
 def context_section(context_items):
     return CONTEXT_ITEMS_SEPARATOR.join([

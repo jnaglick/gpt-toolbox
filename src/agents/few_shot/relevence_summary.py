@@ -1,15 +1,15 @@
 from .agent import FewShotAgent
+from .prompts import DEFAULT_SYSTEM, DEFAULT_EXAMPLES
 
-agent = FewShotAgent("RelevenceSummary")
-
-PROMPT = """
+def user(query, text_to_summarize):
+    return f"""
 Given this query:
-{}
+{query}
 Give a very brief summary of the relevant information from this result:
-{}
+{text_to_summarize}
 If the result is not relevant, only output "<NOT_RELEVANT>".
-"""
+""".strip()
 
-def relevence_summary(query, text_to_summarize):
-    prompt = PROMPT.format(query, text_to_summarize).strip()
-    return agent.prediction(prompt)
+class RelevenceSummaryAgent(FewShotAgent):
+    def prompt(self, query, text_to_summarize):
+        return DEFAULT_SYSTEM, DEFAULT_EXAMPLES, user(query, text_to_summarize)

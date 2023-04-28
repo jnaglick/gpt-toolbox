@@ -2,38 +2,40 @@
 from console import console
 from llm import chat_completion
 
-DEFAULT_SYSTEM = """
-You're an expert assistant that gives formatted output exactly as specified
-""".strip()
-
-DEFAULT_EXAMPLES = []
+from .prompts import DEFAULT_SYSTEM, DEFAULT_EXAMPLES
 
 class FewShotAgent:
     def __init__(self, agent_name):
         self.agent_name = agent_name
 
-    def parse_prediction(self, prediction):
-        return prediction
+    def parse_completion(self, completion, *args, **kwargs):
+        return completion
 
-    def prediction(self, user, system=DEFAULT_SYSTEM, examples=DEFAULT_EXAMPLES):
-        with console.status(f"[bold green]Executing Agent: {self.agent_name} (Few Shot)...[/]"):
-            console.log(f"({self.agent_name}) Getting prediction...")
+    def prompt(self, query, *args, **kwargs):
+        return DEFAULT_SYSTEM, DEFAULT_EXAMPLES, query
+
+    def prediction(self, *args, **kwargs):
+        with console.status(f"[bold green]Executing Agent: {self.agent_name}...[/]"):
+            console.log(f"({self.agent_name}) Getting prediction...")   
+
+            system, examples, user = self.prompt(*args, **kwargs)
+
             console.verbose((system, examples, user))
 
-            prediction = chat_completion(system, examples, user)
+            completion = chat_completion(system, examples, user)
+
+            if not completion:
+                console.error(f"({self.agent_name}) Fail: Couldn't get LLM completion")
+                # TODO retry
+                return None
+            
+            console.verbose(completion)
+
+            prediction = self.parse_completion(completion, *args, **kwargs)
 
             if not prediction:
-                console.error(f"({self.agent_name}) Fail: Couldn't get LLM output")
+                console.error(f"({self.agent_name}) Fail: Couldn't parse LLM completion")
                 # TODO retry
                 return None
 
-            parsed_prediction = self.parse_prediction(prediction)
-
-            if not parsed_prediction:
-                console.error(f"({self.agent_name}) Fail: Couldn't parse LLM output")
-                # TODO retry
-                return None
-
-            console.verbose(prediction)
-
-            return parsed_prediction
+            return prediction

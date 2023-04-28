@@ -1,42 +1,53 @@
 from . import user
+from .special_tokens import *
 
 def example_previous(previous):
     return f"""
-PreviousActions: {previous}
+{SECTION_PREVIOUS_ACTIONS}: {previous}
     """.strip()
 
 def example_thought(thought):
     return f"""
-InternalThought: {thought}
+{SECTION_INTERNAL_THOUGHT}: {thought}
     """.strip()
 
 def example_answer(output):
     return f"""
-Do I have enough information to answer the user's query: yes
-Answer: {output}
+{SECTION_ENOUGH_INFO}: yes
+{SECTION_ANSWER}: {output}
     """.strip()
 
 def example_search(output):
     return f"""
-Do I have enough information to answer the user's query: no
-WebSearch: {output}
-    """.strip()
-
-def example_access(output):
-    return f"""
-Do I have enough information to answer the user's query: no
-WebAccess: {output}
+{SECTION_ENOUGH_INFO}: no
+{SECTION_WEB_SEARCH}: {output}
     """.strip()
 
 def examples():
     return [
       [
         user(
+          "Who was the 23rd president of the United States?"
+        ),
+        example_answer(
+          "Benjamin Harrison."
+        )
+      ],
+      [
+        user(
+          "Where is the island of Java?"
+        ),
+        example_answer(
+          "Java is located in Southeast Asia and is part of Indonesia."
+        )
+      ],
+      [
+        user(
           "What is the weather in New York?"
         ),
         "\n".join([
           example_thought(
-            "I dont know the current weather. I need to run a web search to find websites that can tell me."
+            "Answering this question requires live information, so I will need to search the web."
           ),
           example_search("current weather new york"),
         ])
@@ -47,7 +58,7 @@ def examples():
           [[
             "WebSearch", 
             "current weather new york", 
-            "[('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city')]"
+            "[('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727', 'Access Denied'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727', 'New York City Feels like 68 F Clear Alerts'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city', 'MORE INFO')]"
           ]]
         ),
         "\n".join([
@@ -55,59 +66,62 @@ def examples():
             "WebSearch: current weather new york"
           ),
           example_thought(
-            "I dont know the current weather. I know a list of websites that can tell me from the context. I need to run a web access on one of them."
+            "The second result tells me the answer."
           ),
-          example_access("https://www.accuweather.com/en/us/new-york/10021/current-weather/349727"),
+          example_answer("The current temperature in New York is 64 degrees Fahrenheit.")   
         ])
       ],
       [
         user(
-          "What is the weather in New York?",
-          [[
-            "WebAccess",
-            "https://www.accuweather.com/en/us/new-york/10021/current-weather/349727",
-            "Access Denied"
-          ],[
-            "WebSearch", 
-            "current weather new york", 
-            "[('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city')]"
-          ]]
+          "What is the weather in New York and Who won the Academy Award for Best Picture in 2023?"
         ),
         "\n".join([
-          example_previous(
-            "WebAccess: https://www.accuweather.com/en/us/new-york/10021/current-weather/349727, WebSearch: current weather new york"
-          ),
           example_thought(
-            "I dont know the current weather. I know a list of websites that can tell me from the context. I know the results for www.accuweather.com were Access Denied. I need to run a web access on one of them that isnt www.accuweather.com and I think is more likely to work."
+            "Answering this question requires multiple searches, so I'll just pick one."
           ),
-          example_access("https://www.wunderground.com/weather/us/ny/new-york-city"),
+          example_search("current weather new york"),
         ])
       ],
       [
         user(
-          "What is the weather in New York?", 
+          "What is the weather in New York and Who won the Academy Award for Best Picture in 2023?",
           [[
-            "WebAccess",
-            "https://www.wunderground.com/weather/us/ny/new-york-city",
-            "New York City Feels like 68 F Clear Alerts"
-          ],[
-            "WebAccess",
-            "https://www.accuweather.com/en/us/new-york/10021/current-weather/349727",
-            "Access Denied"
-          ],[
             "WebSearch", 
             "current weather new york", 
-            "[('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city')]"
+            "[('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727', 'Access Denied'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727', 'New York City Feels like 68 F Clear Alerts'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city', 'MORE INFO')]"
           ]]
         ),
         "\n".join([
           example_previous(
-            "WebAccess: https://www.wunderground.com/weather/us/ny/new-york-city, WebAccess: https://www.accuweather.com/en/us/new-york/10021/current-weather/349727, WebSearch: current weather new york"
+            "WebSearch: current weather new york"
           ),
           example_thought(
-            "I have enough information to answer the user's query in the context."
+            "The second result tells me the answer to the first part of the question, but I need to do another search for the second part of the question."
           ),
-          example_answer("The current temperature in New York is 64 degrees Fahrenheit.")        
+          example_search("academy award best picture 2023"),
+        ])
+      ],
+            [
+        user(
+          "What is the weather in New York and Who won the Academy Award for Best Picture in 2023?",
+          [[
+            "WebSearch", 
+            "current weather new york", 
+            "[('New York, NY Current Weather | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/current-weather/349727', 'Access Denied'), ('New York, NY Weather Forecast | AccuWeather', 'https://www.accuweather.com/en/us/new-york/10021/weather-forecast/349727', 'New York City Feels like 68 F Clear Alerts'), ('New York City, NY Weather Conditions | Weather Underground', 'https://www.wunderground.com/weather/us/ny/new-york-city', 'MORE INFO')]"
+          ],[
+            "WebSearch", 
+            "academy award best picture 2023", 
+            "[('ACADEMY AWARDS 2023', 'https://www.oscars.org/oscars/ceremonies/2023', 'The Academy Award for Best Picture in 2023 was won by Everything Everywhere All at Once')]"
+          ]]
+        ),
+        "\n".join([
+          example_previous(
+            "WebSearch: current weather new york, WebSearch: academy award best picture 2023"
+          ),
+          example_thought(
+            "I have enough information to answer the question from the context"
+          ),
+          example_answer("The current temperature in New York is 64 degrees Fahrenheit. The Academy Award for Best Picture in 2023 was won by Everything Everywhere All at Once.")
         ])
       ],
     ]
