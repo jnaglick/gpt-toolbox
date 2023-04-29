@@ -3,3 +3,4 @@ graphviz>=0.20.1
 openai>=0.27.0
 python-dotenv>=1.0.0
 rich>=13.3.4
+tiktoken>=0.3.3

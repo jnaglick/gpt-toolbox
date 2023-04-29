@@ -3,6 +3,8 @@ import openai
 from console import console
 from utils import env
 
+from .count_tokens import count_tokens
+
 def setup():
     openai_api_key = env["OPENAI_API_KEY"]
     if not openai_api_key:
@@ -12,6 +14,7 @@ def setup():
 setup()
 
 def compose_examples(examples):
+    # TODO experiment with 'name' field (https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb)
     out = []
     for example in examples:
         out.append({"role": "user", "content": example[0]})
@@ -29,15 +32,27 @@ def chat_completion(system, examples, user, model="gpt-3.5-turbo"):
     try:
         messages = compose(system, examples, user)
 
-        # TODO count tokens (complete rewrite with direct requests?) and use max_tokens=
+        expected_num_tokens = count_tokens(messages, model)
+
+        # TODO heuristic downsize prompt if too large
 
         completion = openai.ChatCompletion.create(
             model=model,
             messages=messages,
             temperature=0, # based on HuggingGPT
-            # best_of
-            # n
+            # TODO max_tokens = max_for_model(model) - expected_num_tokens
         )
+
+        token_log_lines = [
+            f"Prompt (Actual): {completion.usage.prompt_tokens}",
+            f"Prompt (Expected): {expected_num_tokens}",
+            f"Prompt (Δ): {completion.usage.prompt_tokens - expected_num_tokens}",
+            f"Completion: {completion.usage.completion_tokens}",
+            f"Total: {completion.usage.total_tokens}"
+        ]
+
+        console.log(f"[purple bold](llm) Token Count:[/]\n{' | '.join(token_log_lines)}")
+
         return completion.choices[0].message.content
     except openai.error.APIError as e:
         console.error(f"(llm) OpenAI API returned an API Error: {e}")
