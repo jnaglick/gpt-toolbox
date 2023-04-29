@@ -2,17 +2,36 @@
 from console import console
 from llm import chat_completion
 
-from .prompts import DEFAULT_SYSTEM, DEFAULT_EXAMPLES
+DEFAULT_SYSTEM = """
+You're an expert assistant that gives formatted output exactly as specified.
+""".strip()
+
+# TODO "Think about the problem step by step..."
+
+DEFAULT_EXAMPLES = []
 
 class FewShotAgent:
     def __init__(self, agent_name):
         self.agent_name = agent_name
 
+    def system_prompt(self, *args, **kwargs):
+        return DEFAULT_SYSTEM
+    
+    def examples_prompt(self, *args, **kwargs):
+        return DEFAULT_EXAMPLES
+    
+    def user_prompt(self, query, *args, **kwargs):
+        return query
+
+    def prompt(self, *args, **kwargs):
+        return (
+            self.system_prompt(*args, **kwargs),
+            self.examples_prompt(*args, **kwargs),
+            self.user_prompt(*args, **kwargs)
+        )
+    
     def handle_completion(self, completion, *args, **kwargs):
         return completion
-
-    def prompt(self, query, *args, **kwargs):
-        return DEFAULT_SYSTEM, DEFAULT_EXAMPLES, query
 
     def prediction(self, *args, **kwargs):
         with console.status(f"[bold green]Executing Agent: {self.agent_name}...[/]"):

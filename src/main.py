@@ -1,5 +1,4 @@
-from agents import executive_agent, web_agent
-
+from agents import WebInformedAgent
 
 # questions that dont require web access
 noop_benchmarks = [
@@ -33,4 +32,6 @@ check = [
     ["When does your training data end?"] # sept 2021
 ]
 
-web_agent("Who won the Academy Award for Best Actor in 2023 and who lost the MLB world series in 2022?")
+web_agent = WebInformedAgent("Main")
+
+web_agent.prediction("Who won the Academy Award for Best Actor in 2023 and who lost the MLB world series in 2022?")

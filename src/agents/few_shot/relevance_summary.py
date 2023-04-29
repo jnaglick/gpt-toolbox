@@ -9,7 +9,6 @@ Give a very brief summary of the relevant information from this result:
 If the result is not relevant, only output "<NOT_RELEVANT>".
 """.strip()
 
-agent = FewShotAgent("RelevenceSummary")
-
-def relevance_summary(query, text_to_summarize):
-    return agent.prediction(user(query, text_to_summarize))
+class RelevenceSummaryAgent(FewShotAgent):
+    def user_prompt(self, query, text_to_summarize):
+        return user(query, text_to_summarize)
