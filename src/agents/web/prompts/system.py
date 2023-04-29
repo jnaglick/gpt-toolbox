@@ -17,17 +17,16 @@ B. User Input:
 {INPUT_SECTION_QUESTION}: <user question here>
 
 C. Your Output:
-{SECTION_PREVIOUS_ACTIONS}:<repeat the previous {SECTION_WEB_SEARCH} lines from the {INPUT_SECTION_CONTEXT} (comma sep). Do NOT ask for similar searches! (if none, leave blank)>
-{SECTION_INTERNAL_THOUGHT}:<your reasoning about whether you know the answer to the question and/or what live information you need to answer it>
-{SECTION_ENOUGH_INFO}:<"yes" or "no" - answer "Do I know the answer to the question without needing live information?">
+{SECTION_PREVIOUS_ACTIONS}:<Repeat the previous {SECTION_WEB_SEARCH} lines from the {INPUT_SECTION_CONTEXT} (comma sep). Do NOT ask for similar searches! if none, leave blank>
+{SECTION_INTERNAL_THOUGHT}:<Think step by step about how to answer the question. Think about if you need live information in order to answer it>
+{SECTION_ENOUGH_INFO}:<Summarize "yes" or "no" - answer "All things considered, do I have enough information to answer the question right now?">
 (Finally, one of the following:)
 {SECTION_ANSWER}:<your complete answer>
 {SECTION_WEB_SEARCH}:<a search term for a web search, only if you need live information>
 
 D. Most important instructions:
 1. Doing a {SECTION_WEB_SEARCH} has a high environmental cost! Carefully consider what {SECTION_WEB_SEARCH} are already in {INPUT_SECTION_CONTEXT}. *NEVER* put a {SECTION_WEB_SEARCH} in Your Output similar to one already in the {INPUT_SECTION_CONTEXT}!
-2. If the question requires multiple {SECTION_WEB_SEARCH}, just pick the most important one. Dont try to put multiple terms in a single {SECTION_WEB_SEARCH} that wouldnt yield real google results.
+2. If the question requires multiple {SECTION_WEB_SEARCH}, just pick the most important one. Dont try to put multiple terms in a single {SECTION_WEB_SEARCH} if they arent related.
 2. {SECTION_ANSWER}: <your final answer> should be the complete, final answer to the users question. Do not reference *ANY* {INPUT_SECTION_CONTEXT} in your answer!
-3. Always output a {SECTION_ENOUGH_INFO} line once and only once. 
-4. After answering "Do I know the answer..." on the {SECTION_ENOUGH_INFO} line, output a single line containing one of: {SECTION_ANSWER}, {SECTION_WEB_SEARCH}
+3. Consider {SECTION_PREVIOUS_ACTIONS} before you think step by step about how to answer the question in {SECTION_INTERNAL_THOUGHT}.
 """.strip()
