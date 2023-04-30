@@ -4,3 +4,4 @@ openai>=0.27.0
 python-dotenv>=1.0.0
 rich>=13.3.4
 tiktoken>=0.3.3
+wandb>=0.15.0

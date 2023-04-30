@@ -1,4 +1,5 @@
 from agents import WebInformedAgent
+from utils import wandb_autolog
 
 # questions that dont require web access
 noop_benchmarks = [
@@ -32,6 +33,9 @@ check = [
     ["When does your training data end?"] # sept 2021
 ]
 
-web_agent = WebInformedAgent("Main")
+with wandb_autolog():
+    web_agent = WebInformedAgent("Main")
 
-web_agent.prediction("Who won the Academy Award for Best Actor in 2023 and who lost the MLB world series in 2022?")
+    prediction = web_agent.prediction("Who won the Academy Award for Best Actor in 2023 and who lost the MLB world series in 2022?")
+
+    print(prediction)
