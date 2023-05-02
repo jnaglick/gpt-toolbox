@@ -3,25 +3,15 @@
 
 import tiktoken
 
-def count_tokens(messages, model="gpt-3.5-turbo-0301"):
-    if model == "gpt-3.5-turbo":
-        # print("Warning: gpt-3.5-turbo may change over time. Returning num tokens assuming gpt-3.5-turbo-0301.")
-        return count_tokens(messages, model="gpt-3.5-turbo-0301")
-    elif model == "gpt-4":
-        # print("Warning: gpt-4 may change over time. Returning num tokens assuming gpt-4-0314.")
-        return count_tokens(messages, model="gpt-4-0314")
-    elif model == "gpt-3.5-turbo-0301":
-        tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
-        tokens_per_name = -1  # if there's a name, the role is omitted
-    elif model == "gpt-4-0314":
-        tokens_per_message = 3
-        tokens_per_name = 1
-    else:
-        raise NotImplementedError(f"count_tokens() is not implemented for model {model}.")
+from .model_specs import get_model_spec
 
-    # TODO gpt4-32k?
+def count_tokens(messages, model):
+    model_spec = get_model_spec(model)
 
-    encoding = tiktoken.encoding_for_model(model)
+    tokens_per_message = model_spec["tokens_per_message"]
+    tokens_per_name = model_spec["tokens_per_name"]
+
+    encoding = tiktoken.encoding_for_model(model_spec["id"])
 
     num_tokens = 0
     for message in messages:
