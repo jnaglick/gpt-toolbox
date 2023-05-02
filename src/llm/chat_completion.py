@@ -14,6 +14,12 @@ def setup():
 
 setup()
 
+def compose_system(system):
+    return [{
+        "role": "system",
+        "content": system
+    }]
+
 def compose_examples(examples):
     # TODO experiment with 'name' field (https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb)
     out = [] # TODO use list comprehension
@@ -22,25 +28,40 @@ def compose_examples(examples):
         out.append({"role": "assistant", "content": example[1]})
     return out
 
-def compose(system, examples, user):
+def compose_user(user):
+    return [{
+        "role": "user",
+        "content": user
+    }]
+
+def compose_messages(system, examples, user):
     return [
-        {"role": "system", "content": system},
+        *compose_system(system),
         *compose_examples(examples),
-        {"role": "user", "content": user},
+        *compose_user(user),
     ]
 
-def chat_completion(system, examples, user, model=ModelType.GPT_3_5_TURBO_0301):
+def count_chat_completion_prompt_tokens(system, examples, user, model: ModelType):
+    return {
+        "system": count_tokens(compose_system(system), model, count_priming_tokens=False),
+        "examples": count_tokens(compose_examples(examples), model, count_priming_tokens=False),
+        "user": count_tokens(compose_user(user), model, count_priming_tokens=False),
+        "total": count_tokens(compose_messages(system, examples, user), model),
+        "model_max": get_model_spec(model)["max_tokens"]
+    }
+
+def check_chat_completion_prompt(system, examples, user, model: ModelType, completion_size=0):
+    counts = count_chat_completion_prompt_tokens(system, examples, user, model)
+
+    return counts["total"] <= counts["model_max"] - completion_size, counts
+
+def chat_completion(system, examples, user, model: ModelType):
     try:
         model_spec = get_model_spec(model)
 
-        messages = compose(system, examples, user)
+        messages = compose_messages(system, examples, user)
 
         local_prompt_token_count = count_tokens(messages, model)
-
-        # TODO heuristic downsize prompt if too large
-
-        if local_prompt_token_count > model_spec["max_tokens"]:
-            console.error(f"(llm) Prompt token count ({local_prompt_token_count}) exceeds model max tokens ({model_spec['max_tokens']}). Failure incoming...")
 
         completion = openai.ChatCompletion.create(
             model=model_spec["id"],

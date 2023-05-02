@@ -3,9 +3,9 @@
 
 import tiktoken
 
-from .model_specs import get_model_spec
+from .model_specs import get_model_spec, ModelType
 
-def count_tokens(messages, model):
+def count_tokens(messages, model: ModelType, count_priming_tokens=True):
     model_spec = get_model_spec(model)
 
     tokens_per_message = model_spec["tokens_per_message"]
@@ -20,6 +20,8 @@ def count_tokens(messages, model):
             num_tokens += len(encoding.encode(value))
             if key == "name":
                 num_tokens += tokens_per_name
-    num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
+
+    if count_priming_tokens:
+        num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
 
     return num_tokens
