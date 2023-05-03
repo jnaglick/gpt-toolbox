@@ -6,11 +6,11 @@ from .routes import routes
 def add_routes(server, routes):
     @server.route('/openapi.yaml')
     def serve_openapi_spec():
-        return send_from_directory('./.well-known/', 'openapi.yaml')
+        return send_from_directory('../.well-known/', 'openapi.yaml')
     
     @server.route('/.well-known/ai-plugin.json')
     def serve_ai_plugin():
-        return send_from_directory('./.well-known/', 'ai-plugin.json')
+        return send_from_directory('../.well-known/', 'ai-plugin.json')
 
     resources = []
 
