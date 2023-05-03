@@ -1,4 +1,4 @@
-from .current import current_datetime
+from .current_datetime import current_datetime
 from .duckduckgo import duckduckgo
 from .env import env
 from .wandb import wandb_autolog
