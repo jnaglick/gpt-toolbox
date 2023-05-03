@@ -46,6 +46,31 @@ components:
       - title
       - url
       type: object
+    ShellRequest:
+      properties:
+        command:
+          description: The zsh command to run on the user's machine.
+          type: string
+      required:
+      - command
+      type: object
+    ShellResult:
+      properties:
+        returncode:
+          description: The return code of the command. 0 means success, anything else
+            means failure.
+          type: integer
+        stderr:
+          description: The standard error of the command.
+          type: string
+        stdout:
+          description: The standard output of the command.
+          type: string
+      required:
+      - returncode
+      - stderr
+      - stdout
+      type: object
     Task:
       properties:
         notes:
@@ -141,6 +166,28 @@ paths:
           description: Invalid input, a required field is missing
       summary: Search the web for something. This will execute a web search and return
         the results.
+  /shell:
+    post:
+      operationId: shell
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShellRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ShellResult'
+                type: array
+          description: Search result
+        '400':
+          description: Invalid input, a required field is missing
+      summary: Run a shell command on the user's machine and get the results. This
+        can be used for many different things - get creative (Hint, store results
+        using the tasks API and then retrieve them later!)
   /tasks:
     get:
       operationId: listTasks

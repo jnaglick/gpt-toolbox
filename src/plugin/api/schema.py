@@ -32,4 +32,22 @@ class UrlRequest(Schema):
 class UrlResult(Schema):
     body = fields.String(required=True, description="Raw text extracted from the page. Read this carefully to extract good information from this yourself.")
 
-components = [Task, CreateTaskRequest, UpdateTaskRequest, SearchRequest, SearchResult, UrlRequest, UrlResult]
+class ShellRequest(Schema):
+    command = fields.String(required=True, description="The zsh command to run on the user's machine.")
+
+class ShellResult(Schema):
+    returncode = fields.Integer(required=True, description="The return code of the command. 0 means success, anything else means failure.")
+    stdout = fields.String(required=True, description="The standard output of the command.")
+    stderr = fields.String(required=True, description="The standard error of the command.")
+
+components = [
+    Task, 
+    CreateTaskRequest, 
+    UpdateTaskRequest, 
+    SearchRequest, 
+    SearchResult, 
+    UrlRequest, 
+    UrlResult,
+    ShellRequest,
+    ShellResult,
+]
