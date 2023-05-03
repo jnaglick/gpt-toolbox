@@ -45,7 +45,7 @@ task_service = TaskService()
 
 def index(server):
     @server.route('/tasks', methods=['GET'])
-    def get_tasks():
+    def _index():
         """List all Task items
         ---
         get:
@@ -63,7 +63,7 @@ def index(server):
         """
         return jsonify(task_service.get_all_tasks())
 
-    return get_tasks
+    return _index
 
 def get(server):
     @server.route('/tasks/<string:task_uuid>', methods=['GET'])
