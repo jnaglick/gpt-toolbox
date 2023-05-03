@@ -106,6 +106,20 @@ info:
   version: v1
 openapi: 3.0.2
 paths:
+  /datetime:
+    get:
+      operationId: datetime
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: The current datetime in the user's local timezone.
+                type: string
+          description: The current datetime in the user's local timezone.
+      summary: Get the current datetime in the user's local timezone. Before answering
+        questions related to the current datetime, you can use this to know it exactly
+        in order to give a better answer.
   /search:
     post:
       operationId: search

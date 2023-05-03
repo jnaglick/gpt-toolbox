@@ -1,9 +1,11 @@
-from .tasks import routes as tasks_routes
+from .datetime import datetime
+from .tasks import tasks
 from .search import search
 from .url import url
 
 routes = [
-    *tasks_routes,
+    datetime,
+    *tasks,
     search,
     url,
 ]

@@ -200,4 +200,4 @@ def delete(server):
 
     return _delete
 
-routes = [index, get, post, put, delete]
+tasks = [index, get, post, put, delete]
