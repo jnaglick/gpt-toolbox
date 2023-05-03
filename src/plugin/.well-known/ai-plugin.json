@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "GPT Toolbox",
+  "name_for_model": "toolbox",
+  "description_for_human": "Gives you a bunch of tools!",
+  "description_for_model": "Gives you a bunch of tools!",
+  "auth": {
+      "type": "none"
+  },
+  "api": {
+      "type": "openapi",
+      "url": "http://localhost:3333/openapi.yaml",
+      "is_user_authenticated": false
+  },
+  "logo_url": "",
+  "contact_email": "jnaglick@gmail.com",
+  "legal_info_url": ""
+}

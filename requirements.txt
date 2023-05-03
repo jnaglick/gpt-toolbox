@@ -5,3 +5,11 @@ python-dotenv>=1.0.0
 rich>=13.3.4
 tiktoken>=0.3.3
 wandb>=0.15.0
+
+# for plugin:
+apispec>=6.3.0
+apispec-webframeworks>=0.5.2
+flask>=2.3.1
+flask-cors>=3.0.10
+marshmallow>=3.19.0
+pyyaml>=6.0
