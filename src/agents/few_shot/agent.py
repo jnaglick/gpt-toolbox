@@ -1,16 +1,13 @@
-# most basic agent: prompts the llm once with a few examples
 from console import console
-from llm import chat_completion, check_chat_completion_prompt, get_model_spec, ModelType
+from llm import chat_completion, ChatSession, get_model_spec, ModelType
 
 DEFAULT_SYSTEM = """
 You're an expert assistant that gives formatted output exactly as specified.
 """.strip()
 
-# TODO "Think about the problem step by step..."
-
 DEFAULT_EXAMPLES = []
 
-class FewShotAgent:
+class BasicFewShotAgent:
     def __init__(self, agent_name):
         self.agent_name = agent_name
 
@@ -29,38 +26,21 @@ class FewShotAgent:
             self.examples_prompt(*args, **kwargs),
             self.user_prompt(*args, **kwargs)
         )
-    
-    def check_prompt(self, system, examples, user, model):
-        prompt_check, token_counts = check_chat_completion_prompt(system, examples, user, model)
 
-        if not prompt_check:
-            console.verbose("({self.agent_name}) Prompt check failed, downsizing prompt...")
-            return self.downsize_prompt(system, examples, user, model, token_counts)
-        
-        return system, examples, user
-
-    def downsize_prompt(self, system, examples, user, model, token_counts):
-        model_spec = get_model_spec(model)
-
-        console.error(f"({self.agent_name}) Fail: Prompt token count exceeds {model_spec['name']} max tokens ({model_spec['max_tokens']}) Failure incoming...")
-        console.verbose(token_counts)
-
-        return system, examples, user
+    def completion(self, system, examples, user, model):
+        return chat_completion(system, examples, user, model)
 
     def handle_completion(self, completion, *args, **kwargs):
         return completion
 
     def prediction(self, *args, model=ModelType.GPT_3_5_TURBO, **kwargs):
-        with console.status(f"[bold green]Executing Agent: {self.agent_name}...[/]"):
+        with console.status(self.prediction_status_msg()):
             console.log(f"({self.agent_name}) Getting prediction...")
 
             system, examples, user = self.prompt(*args, **kwargs)
-
-            system, examples, user = self.check_prompt(system, examples, user, model)
-
             console.verbose((system, examples, user))
 
-            completion = chat_completion(system, examples, user, model)
+            completion = self.completion(system, examples, user, model)
 
             if not completion:
                 console.error(f"({self.agent_name}) Fail: Couldn't get LLM completion")
@@ -77,3 +57,36 @@ class FewShotAgent:
                 return None
 
             return prediction
+
+    def prediction_status_msg(self):
+        return f"[bold green]Executing Agent: {self.agent_name}[/]"
+
+class FewShotAgent(BasicFewShotAgent):
+    def __init__(self, agent_name, session=None):
+        super().__init__(agent_name)
+        self.session = session or ChatSession()
+
+    def completion(self, system, examples, user, model):
+        system, examples, user = self.check_and_downsize(system, examples, user, model)
+
+        return self.session.completion(system, examples, user, model)
+
+    def check_and_downsize(self, system, examples, user, model):
+        if self.session.precheck_completion(system, examples, user, model):
+            return system, examples, user
+
+        console.verbose("({self.agent_name}) Completion precheck failed, downsizing prompt...")
+
+        return self.downsize_prompt(system, examples, user, model)
+
+    def downsize_prompt(self, system, examples, user, model):
+        token_counts = self.session.token_counts(system, examples, user, model)
+        model_spec = get_model_spec(model)
+
+        console.error(f"({self.agent_name}) Fail: Prompt token count ({token_counts['total_prompt']}) exceeds max tokens ({model_spec['max_tokens']}) of model ({model_spec['name']}). Failure incoming...")
+        console.verbose(token_counts)
+
+        return system, examples, user
+    
+    def prediction_status_msg(self):
+        return f"[bold green]Executing Agent: {self.agent_name} (tks: {self.session.current_token_usage()}, usd: ${self.session.current_cost_usage()})[/]"

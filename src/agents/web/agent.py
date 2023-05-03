@@ -14,10 +14,10 @@ def search_action(search_term, relevance_summary):
     ]
 
 class WebInformedAgent(FewShotAgent):
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, session):
+        super().__init__(name, session)
         self.context_items = []
-        self.relevance_summary_agent = RelevenceSummaryAgent(f"{name}/RelevanceSummary")
+        self.relevance_summary_agent = RelevenceSummaryAgent(f"{name}/RelevanceSummary", session)
 
     def add_to_context(self, action, action_input, action_result):
         self.context_items.insert(0, (action, action_input, action_result))

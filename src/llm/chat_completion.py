@@ -41,19 +41,14 @@ def compose_messages(system, examples, user):
         *compose_user(user),
     ]
 
-def count_chat_completion_prompt_tokens(system, examples, user, model: ModelType):
+def chat_completion_token_counts(system, examples, user, model: ModelType):
     return {
         "system": count_tokens(compose_system(system), model, count_priming_tokens=False),
         "examples": count_tokens(compose_examples(examples), model, count_priming_tokens=False),
         "user": count_tokens(compose_user(user), model, count_priming_tokens=False),
-        "total": count_tokens(compose_messages(system, examples, user), model),
+        "total_prompt": count_tokens(compose_messages(system, examples, user), model),
         "model_max": get_model_spec(model)["max_tokens"]
     }
-
-def check_chat_completion_prompt(system, examples, user, model: ModelType, completion_size=0):
-    counts = count_chat_completion_prompt_tokens(system, examples, user, model)
-
-    return counts["total"] <= counts["model_max"] - completion_size, counts
 
 def chat_completion(system, examples, user, model: ModelType):
     try:
@@ -61,26 +56,13 @@ def chat_completion(system, examples, user, model: ModelType):
 
         messages = compose_messages(system, examples, user)
 
-        local_prompt_token_count = count_tokens(messages, model)
-
         completion = openai.ChatCompletion.create(
             model=model_spec["id"],
             messages=messages,
             temperature=0, # based on HuggingGPT
-            # TODO max_tokens = model_spec["max_tokens"] - local_prompt_tokens
         )
 
-        token_log_lines = [
-            f"Prompt (Actual): {completion.usage.prompt_tokens}",
-            f"Prompt (Expected): {local_prompt_token_count}",
-            f"Prompt (Δ): {completion.usage.prompt_tokens - local_prompt_token_count}",
-            f"Completion: {completion.usage.completion_tokens}",
-            f"Total: {completion.usage.total_tokens}"
-        ]
-
-        console.log(f"[purple bold](llm) Token Count:[/]\n{' | '.join(token_log_lines)}")
-
-        return completion.choices[0].message.content
+        return completion
     except openai.error.APIError as e:
         console.error(f"(llm) OpenAI API returned an API Error: {e}")
         pass
