@@ -8,9 +8,12 @@ from .prompts.special_tokens import SECTION_ANSWER, SECTION_WEB_SEARCH
 
 def search_action(search_term, relevance_summary):
     search_results = duckduckgo(search_term, num_results=3)
+    page_results = [web_request(url) for _, url in search_results]
+    relevance_summaries = [relevance_summary(search_term, content) for content in page_results]
+
     return [
-        (title, url, relevance_summary(search_term, web_request(url)))
-        for title, url in search_results 
+        (title, url, summary)
+        for (title, url), summary in zip(search_results, relevance_summaries)
     ]
 
 class WebInformedAgent(FewShotAgent):
