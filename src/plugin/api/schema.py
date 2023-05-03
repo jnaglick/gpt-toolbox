@@ -18,4 +18,12 @@ class UpdateTaskRequest(Schema):
     status = fields.String(required=False, description="Status of the Task")
     notes = fields.String(required=False, description="Freeform notes about the Task")
 
-components = [Task, CreateTaskRequest, UpdateTaskRequest]
+class SearchRequest(Schema):
+    query = fields.String(required=True, description="Search query.")
+
+class SearchResult(Schema):
+    title = fields.String(required=True, description="Title of the search result page.")
+    url = fields.String(required=True, description="URL of the search result page.")
+    body = fields.String(required=True, description="Raw text extarcted from the search result page. Youll have to extract good information from this yourself.")
+
+components = [Task, CreateTaskRequest, UpdateTaskRequest, SearchRequest, SearchResult]

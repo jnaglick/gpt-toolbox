@@ -21,6 +21,31 @@ components:
       - status
       - task
       type: object
+    SearchRequest:
+      properties:
+        query:
+          description: Search query.
+          type: string
+      required:
+      - query
+      type: object
+    SearchResult:
+      properties:
+        body:
+          description: Raw text extarcted from the search result page. Youll have
+            to extract good information from this yourself.
+          type: string
+        title:
+          description: Title of the search result page.
+          type: string
+        url:
+          description: URL of the search result page.
+          type: string
+      required:
+      - body
+      - title
+      - url
+      type: object
     Task:
       properties:
         notes:
@@ -64,6 +89,25 @@ info:
   version: v1
 openapi: 3.0.2
 paths:
+  /search:
+    post:
+      operationId: search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResult'
+          description: Search result
+        '400':
+          description: Invalid input, a required field is missing
+      summary: Search the web for something. This will execute a web search and return
+        the results.
   /tasks:
     get:
       operationId: listTasks
