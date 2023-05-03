@@ -24,6 +24,12 @@ class SearchRequest(Schema):
 class SearchResult(Schema):
     title = fields.String(required=True, description="Title of the search result page.")
     url = fields.String(required=True, description="URL of the search result page.")
-    body = fields.String(required=True, description="Raw text extarcted from the search result page. Youll have to extract good information from this yourself.")
+    body = fields.String(required=True, description="Raw text extarcted from the search result page. Read this carefully to extract good information from this yourself.")
 
-components = [Task, CreateTaskRequest, UpdateTaskRequest, SearchRequest, SearchResult]
+class UrlRequest(Schema):
+    url = fields.String(required=True, description="URL of the page to extract information from.")
+
+class UrlResult(Schema):
+    body = fields.String(required=True, description="Raw text extracted from the page. Read this carefully to extract good information from this yourself.")
+
+components = [Task, CreateTaskRequest, UpdateTaskRequest, SearchRequest, SearchResult, UrlRequest, UrlResult]

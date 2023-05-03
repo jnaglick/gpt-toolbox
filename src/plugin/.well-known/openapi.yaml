@@ -32,7 +32,7 @@ components:
     SearchResult:
       properties:
         body:
-          description: Raw text extarcted from the search result page. Youll have
+          description: Raw text extarcted from the search result page. Read this carefully
             to extract good information from this yourself.
           type: string
         title:
@@ -83,6 +83,23 @@ components:
           description: Task description
           type: string
       type: object
+    UrlRequest:
+      properties:
+        url:
+          description: URL of the page to extract information from.
+          type: string
+      required:
+      - url
+      type: object
+    UrlResult:
+      properties:
+        body:
+          description: Raw text extracted from the page. Read this carefully to extract
+            good information from this yourself.
+          type: string
+      required:
+      - body
+      type: object
 info:
   description: A ChatGPT plugin API for the GPT Toolbox
   title: GPT Toolbox API
@@ -102,7 +119,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SearchResult'
+                items:
+                  $ref: '#/components/schemas/SearchResult'
+                type: array
           description: Search result
         '400':
           description: Invalid input, a required field is missing
@@ -200,5 +219,24 @@ paths:
           description: Invalid input, at least one field must be provided
       summary: Update a Task item by UUID. At least one field must be provided, but
         you can also update multiple fields at once.
+  /url:
+    post:
+      operationId: url
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UrlRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlResult'
+          description: Result
+        '400':
+          description: Invalid input, a required field is missing
+      summary: Look up something on the web. This will access the url and return the
+        results.
 servers:
 - url: http://localhost:3333
