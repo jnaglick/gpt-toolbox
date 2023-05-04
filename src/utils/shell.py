@@ -1,6 +1,6 @@
 import subprocess
 
-def run_shell_command(command, shell='/bin/zsh'):
+def run_shell_command(command, shell="/bin/zsh"):
     output = {
         "stdout": None,
         "stderr": None,
@@ -18,7 +18,8 @@ def run_shell_command(command, shell='/bin/zsh'):
         
         output["returncode"] = result.returncode
     except subprocess.CalledProcessError as e:
-        # TODO log
+        # Capture the standard error output from the exception
+        output["stderr"] = e.stderr
         output["returncode"] = e.returncode
 
     return output
