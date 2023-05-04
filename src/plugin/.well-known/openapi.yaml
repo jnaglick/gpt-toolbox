@@ -145,6 +145,18 @@ paths:
       summary: Get the current datetime in the user's local timezone. Before answering
         questions related to the current datetime, you can use this to know it exactly
         in order to give a better answer.
+  /random-number:
+    get:
+      operationId: random_number
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: A random integer between 1 and 100.
+                type: integer
+          description: A random integer between 1 and 100.
+      summary: Get a random integer between 1 and 100.
   /search:
     post:
       operationId: search
