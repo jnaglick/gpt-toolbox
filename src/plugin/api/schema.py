@@ -40,6 +40,12 @@ class ShellResult(Schema):
     stdout = fields.String(required=True, description="The standard output of the command.")
     stderr = fields.String(required=True, description="The standard error of the command.")
 
+class EmbeddingRequest(Schema):
+    input_data = fields.String(required=True, description="The input data for creating the embedding.")
+
+class EmbeddingResult(Schema):
+    embedding = fields.List(fields.Float, required=True, description="The created embedding.")
+
 components = [
     Task, 
     CreateTaskRequest, 
@@ -50,4 +56,6 @@ components = [
     UrlResult,
     ShellRequest,
     ShellResult,
+    EmbeddingRequest, 
+    EmbeddingResult
 ]

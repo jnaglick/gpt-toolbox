@@ -4,6 +4,7 @@ from .search import search
 from .shell import shell
 from .url import url
 from .random_number import random_number
+from .embeddings import create_embedding
 
 routes = [
     datetime,
@@ -12,4 +13,5 @@ routes = [
     shell,
     url,
     random_number,
+    create_embedding,
 ]

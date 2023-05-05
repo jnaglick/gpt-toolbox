@@ -21,6 +21,24 @@ components:
       - status
       - task
       type: object
+    EmbeddingRequest:
+      properties:
+        input_data:
+          description: The input data for creating the embedding.
+          type: string
+      required:
+      - input_data
+      type: object
+    EmbeddingResult:
+      properties:
+        embedding:
+          description: The created embedding.
+          items:
+            type: number
+          type: array
+      required:
+      - embedding
+      type: object
     SearchRequest:
       properties:
         query:
@@ -131,6 +149,22 @@ info:
   version: v1
 openapi: 3.0.2
 paths:
+  /create_embedding:
+    post:
+      operationId: create_embedding
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmbeddingRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbeddingResult'
+          description: The created embedding.
+      summary: Create an embedding for the given input data.
   /datetime:
     get:
       operationId: datetime
