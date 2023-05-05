@@ -3,7 +3,7 @@
   "name_for_human": "GPT Toolbox",
   "name_for_model": "toolbox",
   "description_for_human": "Gives you a bunch of tools!",
-  "description_for_model": "Capabilities: manage tasks, search the web",
+  "description_for_model": "Capabilities: manage tasks, search and access the web, execute shell commands",
   "auth": {
       "type": "none"
   },
