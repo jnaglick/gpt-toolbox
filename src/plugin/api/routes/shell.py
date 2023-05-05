@@ -2,9 +2,6 @@ from utils import run_shell_command
 
 from flask import jsonify, request, abort
 
-def shell_actions(command):
-    return run_shell_command(command)
-
 def shell(server):
     @server.route('/shell', methods=['POST'])
     def _shell():
