@@ -75,7 +75,7 @@ class FewShotAgent(BasicFewShotAgent):
         if self.session.precheck_completion(system, examples, user, model):
             return system, examples, user
 
-        console.verbose("({self.agent_name}) Completion precheck failed, downsizing prompt...")
+        console.verbose(f"({self.agent_name}) Completion precheck failed, downsizing prompt...")
 
         return self.downsize_prompt(system, examples, user, model)
 
