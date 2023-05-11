@@ -2,3 +2,4 @@
 venv
 wandb
 .DS_Store
+.chromadb

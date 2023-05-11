@@ -14,7 +14,9 @@ class ModelType(Enum):
     GPT_4_32K = "gpt-4-32k"
     GPT_4_32K_0314 = "gpt-4-32k-0314"
 
-def create_model_spec(name, openai_id, usd_per_prompt_token, usd_per_completion_token, max_tokens, tokens_per_message, tokens_per_name, deprecation_date):
+    TEXT_EMBEDDING_ADA_002 = "text-embedding-ada-002"
+
+def create_completion_model_spec(name, openai_id, usd_per_prompt_token, usd_per_completion_token, max_tokens, tokens_per_message, tokens_per_name, deprecation_date):
     return {
         "name": name,
         "id": openai_id,
@@ -26,7 +28,7 @@ def create_model_spec(name, openai_id, usd_per_prompt_token, usd_per_completion_
         "deprecation_date": deprecation_date,
     }
 
-gpt_3_5_turbo_0301_model_spec = create_model_spec(
+gpt_3_5_turbo_0301_model_spec = create_completion_model_spec(
     name="GPT-3.5 Turbo (0301)",
     openai_id="gpt-3.5-turbo-0301",
     usd_per_prompt_token=0.002 / 1000,
@@ -37,7 +39,7 @@ gpt_3_5_turbo_0301_model_spec = create_model_spec(
     deprecation_date=None, # TBD
 )
 
-gpt_4_0314_model_spec = create_model_spec(
+gpt_4_0314_model_spec = create_completion_model_spec(
     name="GPT-4 (0314)",
     openai_id="gpt-4-0314",
     usd_per_prompt_token=0.03 / 1000,
@@ -48,7 +50,7 @@ gpt_4_0314_model_spec = create_model_spec(
     deprecation_date=None, # TBD
 )
 
-gpt_4_32k_0314_model_spec = create_model_spec(
+gpt_4_32k_0314_model_spec = create_completion_model_spec(
     name="GPT-4 32k (0314)",
     openai_id="gpt-4-32k-0314",
     usd_per_prompt_token=0.06 / 1000,
@@ -58,6 +60,13 @@ gpt_4_32k_0314_model_spec = create_model_spec(
     tokens_per_name=1,  # not sure
     deprecation_date=None, # TBD
 )
+
+text_embedding_ada_002_model_spec = { # <- NOTE THIS ISNT A COMPLETION MODEL (will clean this file up later)
+    "name": "Text Embedding Ada (002)",
+    "id": "text-embedding-ada-002",
+    "usd_per_input_token": 0.0004 / 1000,
+    "max_tokens": 8191,
+}
 
 # Using the fixed model versions for general reproducibility, and because the continuously updated models dont have guaranteed token counts
 model_specs = {
@@ -69,6 +78,8 @@ model_specs = {
 
     ModelType.GPT_4_32K:      gpt_4_32k_0314_model_spec,
     ModelType.GPT_4_32K_0314: gpt_4_32k_0314_model_spec,
+
+    ModelType.TEXT_EMBEDDING_ADA_002: text_embedding_ada_002_model_spec,
 }
 
 def get_model_spec(model_type: ModelType):

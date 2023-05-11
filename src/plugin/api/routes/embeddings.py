@@ -1,5 +1,6 @@
-from utils.embeddings import generate_embedding
 from flask import request, jsonify
+
+from llm import generate_embedding
 
 def create_embedding(server):
     @server.route("/create_embedding", methods=["POST"])
