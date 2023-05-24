@@ -1,11 +1,15 @@
-from ..document_retriever import DocumentRetriever
-from .python_extractor import PythonExtractor
+from .document_retriever import DocumentRetriever
+from .extract import PythonExtractor
 
 class PythonRetriever(DocumentRetriever):
-    def __init__(self, db, extractor: PythonExtractor = None):
-        if extractor is None:
-            extractor = PythonExtractor()
-        super().__init__(db, extractor)
+    def __init__(self, db):
+        super().__init__(db, PythonExtractor())
+
+    def load_file(self, source: str):
+        self.index(self.extractor.extract_from_file(source))
+
+    def load_dir(self, source: str):
+        self.index(self.extractor.extract_from_directory(source))
 
     def search_for_function(self, fname):
         return self.query("", metadata_filter={"node_name": fname, "node_type": "function"}, max_results=3)

@@ -1,22 +1,23 @@
 import ast
-import os
 import fnmatch
+from typing import List
 from radon.raw import analyze
 
-from ..document_extractor import AbstractDocumentExtractor, DocumentExtractorResult, DocumentExtractorResults
+from .document_extractor import DocumentExtractorResult
+from .filesys_extractor import FilesysExtractor
 
-class Extractor:
+class PythonNodeExtractor:
     node_type = None
     output_type = None
 
     def condition(self, node):
         return NotImplementedError
 
-    def extract(self, node): # TODO rename document
+    def document(self, node):
         return NotImplementedError
     
     def metadata(self, node, additional_metadata=None):
-        code = ast.unparse(node)
+        code = ast.unparse(node) 
         raw_metrics = analyze(code)
 
         metadata = {
@@ -34,23 +35,23 @@ class Extractor:
         
         return metadata
 
-    def process(self, node, additional_metadata=None): # TODO rename extract
+    def extract(self, node, additional_metadata=None):
         if self.condition(node):
-            return DocumentExtractorResult(
-                document=self.extract(node),
+            return [DocumentExtractorResult(
+                document=self.document(node),
                 metadata=self.metadata(node, additional_metadata)
-            )
+            )]
         else:
-            return None
+            return []
 
-class CodeExtractor(Extractor):
+class CodeExtractor(PythonNodeExtractor):
     output_type = "code"
-    def extract(self, node):
+    def document(self, node):
         return ast.unparse(node)
 
-class AstExtractor(Extractor):
+class AstExtractor(PythonNodeExtractor):
     output_type = "ast"
-    def extract(self, node):
+    def document(self, node):
         return ast.dump(node)
 
 class ModuleExtractor(CodeExtractor):
@@ -101,14 +102,14 @@ class ClassAstExtractor(AstExtractor):
     def condition(self, node):
         return isinstance(node, ast.ClassDef)
 
-class CommentExtractor(Extractor):
+class CommentExtractor(PythonNodeExtractor):
     node_type = "comment"
     output_type = "comment"
 
     def condition(self, node):
         return isinstance(node, ast.Expr) and isinstance(node.value, ast.Str)
 
-    def extract(self, node):
+    def document(self, node):
         return node.value.s
 
 EXTRACTORS = [
@@ -128,21 +129,18 @@ EXTRACTORS = [
     # AttributeAccessExtractor(),
 ]
 
-def file_metadata(file_name, file_path):
-    return {
-        'file_name': file_name,
-        'file_path': file_path,
-        'last_modified_time': int(os.path.getmtime(file_path)),
-    }
+class PythonExtractor(FilesysExtractor):
+    def __init__(self, extractors: List[PythonNodeExtractor]=None):
+        super().__init__(extractors or EXTRACTORS)
 
-class PythonExtractor(AbstractDocumentExtractor):
-    def __init__(self, extractors=None):
-        self.extractors = extractors or EXTRACTORS
+    def should_extract_file(self, file_path):
+        return fnmatch.fnmatch(file_path, "*.py")
 
-    def extract_from_source(self, source_code, additional_metadata_for_node=None) -> DocumentExtractorResults:
+    def extract(self, source_code, additional_metadata_for_node=None):
         try:
             tree = ast.parse(source_code)
         except SyntaxError as e:
+            print(e)
             # TODO handle
             return []
 
@@ -154,33 +152,6 @@ class PythonExtractor(AbstractDocumentExtractor):
         extracted = []
 
         for node in ast.walk(tree):
-            for extractor in self.extractors:
-                result = extractor.process(node, additional_metadata_for_node)
-                if result is not None:
-                    extracted.append(result)
-
-        return extracted
-
-    def extract_from_file(self, directory, file_name) -> DocumentExtractorResults:
-        try:
-          file_path = os.path.join(os.path.abspath(directory), file_name)
-
-          with open(file_path, 'r', encoding='utf-8') as f:
-              source_code = f.read()
-              metadata = file_metadata(file_name, file_path)
-              return self.extract_from_source(source_code, metadata)
-        except UnicodeDecodeError:
-            # TODO handle
-            return []
-        except IOError as e:
-            # TODO handle
-            return []
-
-    def extract(self, directory) -> DocumentExtractorResults:
-        extracted = []
-
-        for root, dirs, files in os.walk(directory):
-            for file_name in fnmatch.filter(files, '*.py'):
-                extracted.extend(self.extract_from_file(root, file_name))
+            extracted.extend(super().extract(node, additional_metadata_for_node))
 
         return extracted

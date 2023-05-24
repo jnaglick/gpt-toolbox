@@ -1,23 +1,33 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 from tqdm.notebook import tqdm
 
 from db import AbstractDocumentDatabase
-
-from .document_extractor import AbstractDocumentExtractor, DocumentExtractor
+from .extract import AbstractDocumentExtractor, DocumentExtractor, DocumentExtractorResult
 
 class AbstractDocumentRetriever(ABC):
     @abstractmethod
-    def index(self, source: str) -> None:
+    def index(self, items: List[DocumentExtractorResult]) -> None:
+        pass
+
+    @abstractmethod
+    def load(self, source: str) -> None:
         pass
 
 class DocumentRetriever(AbstractDocumentRetriever):
-    def __init__(self, document_database: AbstractDocumentDatabase, extractor: AbstractDocumentExtractor = DocumentExtractor()):
+    def __init__(self, document_database: AbstractDocumentDatabase, extractor: AbstractDocumentExtractor = None):
+        if extractor is None:
+            extractor = DocumentExtractor()
+
         self.db = document_database
-        self.query = self.db.query
         self.extractor = extractor
 
-    def index(self, source: str):
-        items = self.extractor.extract(source)
+        self.query = self.db.query
+
+    def index(self, items: List[DocumentExtractorResult]):
         for item in tqdm(items, desc="Adding documents to store"):
             self.db.add_document(item.document, item.metadata)
+            
+    def load(self, source: str):
+        self.index(self.extractor.extract(source))

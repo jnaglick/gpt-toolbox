@@ -1,2 +1,2 @@
 from .document_retriever import DocumentRetriever
-from .python import PythonRetriever
+from .python_retriever import PythonRetriever

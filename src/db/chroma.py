@@ -35,7 +35,8 @@ class Chroma(AbstractDocumentDatabase):
         ))
         self.collection = self.client.get_or_create_collection(
             name=database_name,
-            embedding_function=_generate_embedding
+            embedding_function=_generate_embedding,
+            metadata={"hnsw:space": "cosine"}
         )
 
     def add_document(self, document, metadata=None):
