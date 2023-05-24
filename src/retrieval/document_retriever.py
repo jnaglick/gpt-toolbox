@@ -7,9 +7,7 @@ from db import AbstractDocumentDatabase
 from .extract import AbstractDocumentExtractor, DocumentExtractor, DocumentExtractorResult
 
 class AbstractDocumentRetriever(ABC):
-    @abstractmethod
-    def index(self, items: List[DocumentExtractorResult]) -> None:
-        pass
+    # TODO abstract db and extractor props
 
     @abstractmethod
     def load(self, source: str) -> None:

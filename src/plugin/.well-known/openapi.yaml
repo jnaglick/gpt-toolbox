@@ -21,23 +21,51 @@ components:
       - status
       - task
       type: object
-    EmbeddingRequest:
+    MemoryRequest:
       properties:
-        input_data:
-          description: The input data for creating the embedding.
+        dir_path:
+          description: Path to a directory on the local machine to memorize. Will
+            memorize all files in directory. Make sure it exists by using the shell
+            first.
           type: string
-      required:
-      - input_data
+        file_path:
+          description: Path to a file on the local machine to memorize. Make sure
+            the file exists by using the shell first.
+          type: string
+        python_block:
+          description: Python code to memorize. ONLY use this if you need to memorize
+            new python code. If the python code exists in a file or dir, use file_path
+            or python_project_dir_path instead.
+          type: string
+        python_project_dir_path:
+          description: Path to a directory on the local machine containing a python
+            project to memorize. Will memorize all python files in directory. Make
+            sure it exists by using the shell first.
+          type: string
+        text:
+          description: 'Literal text to memorize completely. Only use for plaintext
+            to remember in full. Always use a more specific request param if possible
+            (eg, python_block if its python code) '
+          type: string
+        url:
+          description: URL to a web resource (page, pdf, etc) to memorize. Make sure
+            the URL works first.
+          type: string
       type: object
-    EmbeddingResult:
+    MemoryResult:
       properties:
-        embedding:
-          description: The created embedding.
-          items:
-            type: number
-          type: array
+        error:
+          description: The error that happened when creating the memory if there was
+            one.
+          type: string
+        returncode:
+          description: The return code of the command. 0 means success, anything else
+            means failure. If there's a failure, look at the error message to figure
+            out what went wrong with the memory and either retry or ask the user for
+            help.
+          type: integer
       required:
-      - embedding
+      - returncode
       type: object
     SearchRequest:
       properties:
@@ -149,22 +177,24 @@ info:
   version: v1
 openapi: 3.0.2
 paths:
-  /create_embedding:
+  /create_memory:
     post:
-      operationId: create_embedding
+      operationId: create_memory
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EmbeddingRequest'
+              $ref: '#/components/schemas/MemoryRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmbeddingResult'
-          description: The created embedding.
-      summary: Create an embedding for the given input data.
+                $ref: '#/components/schemas/MemoryResult'
+          description: What happened when creating the memory.
+      summary: Memorizes something. It's very important to use the right request param
+        so the system knows how to memorize it. Before you memorize, think step by
+        step about exactly what to memorize and how.
   /datetime:
     get:
       operationId: datetime

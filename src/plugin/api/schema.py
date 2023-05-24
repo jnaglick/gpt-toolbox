@@ -40,11 +40,35 @@ class ShellResult(Schema):
     stdout = fields.String(required=True, description="The standard output of the command.")
     stderr = fields.String(required=True, description="The standard error of the command.")
 
-class EmbeddingRequest(Schema):
-    input_data = fields.String(required=True, description="The input data for creating the embedding.")
+class MemoryRequest(Schema):
+    text = fields.String(
+        required=False, 
+        description="Literal text to memorize completely. Only use for plaintext to remember in full. Always use a more specific request param if possible (eg, python_block if its python code) "
+    )
+    url = fields.String(
+        required=False, 
+        description="URL to a web resource (page, pdf, etc) to memorize. Make sure the URL works first."
+    )
+    file_path = fields.String(
+        required=False,
+        description="Path to a file on the local machine to memorize. Make sure the file exists by using the shell first."
+    )
+    dir_path = fields.String(
+        required=False,
+        description="Path to a directory on the local machine to memorize. Will memorize all files in directory. Make sure it exists by using the shell first."
+    )
+    python_block = fields.String(
+        required=False,
+        description="Python code to memorize. ONLY use this if you need to memorize new python code. If the python code exists in a file or dir, use file_path or python_project_dir_path instead."
+    )
+    python_project_dir_path = fields.String(
+        required=False,
+        description="Path to a directory on the local machine containing a python project to memorize. Will memorize all python files in directory. Make sure it exists by using the shell first."
+    )
 
-class EmbeddingResult(Schema):
-    embedding = fields.List(fields.Float, required=True, description="The created embedding.")
+class MemoryResult(Schema):
+    returncode = fields.Integer(required=True, description="The return code of the command. 0 means success, anything else means failure. If there's a failure, look at the error message to figure out what went wrong with the memory and either retry or ask the user for help.")
+    error = fields.String(required=False, description="The error that happened when creating the memory if there was one.")
 
 components = [
     Task, 
@@ -56,6 +80,6 @@ components = [
     UrlResult,
     ShellRequest,
     ShellResult,
-    EmbeddingRequest, 
-    EmbeddingResult
+    MemoryRequest,
+    MemoryResult
 ]
