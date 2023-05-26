@@ -21,7 +21,7 @@ components:
       - status
       - task
       type: object
-    MemoryRequest:
+    MemorizeRequest:
       properties:
         dir_path:
           description: Path to a directory on the local machine to memorize. Will
@@ -32,28 +32,22 @@ components:
           description: Path to a file on the local machine to memorize. Make sure
             the file exists by using the shell first.
           type: string
-        python_block:
-          description: Python code to memorize. ONLY use this if you need to memorize
-            new python code. If the python code exists in a file or dir, use file_path
-            or python_project_dir_path instead.
-          type: string
-        python_project_dir_path:
-          description: Path to a directory on the local machine containing a python
-            project to memorize. Will memorize all python files in directory. Make
-            sure it exists by using the shell first.
-          type: string
         text:
-          description: 'Literal text to memorize completely. Only use for plaintext
-            to remember in full. Always use a more specific request param if possible
-            (eg, python_block if its python code) '
+          description: Literal text to memorize completely. Only use for plaintext
+            to remember in full. Always use a more specific param if you can (eg,
+            memorize a file path, dont cat the file and then memorize the text) This
+            is very useful for taking your own notes!
           type: string
         url:
           description: URL to a web resource (page, pdf, etc) to memorize. Make sure
-            the URL works first.
+            the URL works by using the shell first.
           type: string
       type: object
-    MemoryResult:
+    MemorizeResult:
       properties:
+        count:
+          description: The number of memories created. This is useful for debugging.
+          type: integer
         error:
           description: The error that happened when creating the memory if there was
             one.
@@ -65,7 +59,33 @@ components:
             help.
           type: integer
       required:
+      - count
       - returncode
+      type: object
+    RememberRequest:
+      properties:
+        query:
+          description: A natural-language search query on memories. If the user seems
+            to be referencing something specific not in the chat history, try to find
+            it with this. This makes you a much better assistant, so use it often!
+          type: string
+      required:
+      - query
+      type: object
+    RememberResult:
+      properties:
+        document:
+          description: The document that was found. This is the raw text of the document.
+            Read it carefully to extract good information from this yourself.
+          type: string
+        metadata:
+          description: Metadata about the document. Contains *Very Useful Information*
+            about the result (eg, where to find the code). Read it carefully to extract
+            good information from this yourself.
+          type: object
+      required:
+      - document
+      - metadata
       type: object
     SearchRequest:
       properties:
@@ -184,13 +204,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MemoryRequest'
+              $ref: '#/components/schemas/MemorizeRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MemoryResult'
+                $ref: '#/components/schemas/MemorizeResult'
           description: What happened when creating the memory.
       summary: Memorizes something. It's very important to use the right request param
         so the system knows how to memorize it. Before you memorize, think step by
@@ -221,6 +241,25 @@ paths:
                 type: integer
           description: A random integer between 1 and 100.
       summary: Get a random integer between 1 and 100.
+  /remember:
+    post:
+      operationId: remember
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RememberRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RememberResult'
+          description: The memory that was found, if any. If nothing was found, try
+            again with a much different query, or better yet, ask the user for clarification.
+      summary: Remember something you memorized previously. If the user seems to be
+        referencing something specific not in the chat history, try to find it with
+        this. This makes you a much better assistant, so use it often!
   /search:
     post:
       operationId: search

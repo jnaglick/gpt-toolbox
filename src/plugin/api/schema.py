@@ -40,14 +40,14 @@ class ShellResult(Schema):
     stdout = fields.String(required=True, description="The standard output of the command.")
     stderr = fields.String(required=True, description="The standard error of the command.")
 
-class MemoryRequest(Schema):
+class MemorizeRequest(Schema):
     text = fields.String(
         required=False, 
-        description="Literal text to memorize completely. Only use for plaintext to remember in full. Always use a more specific request param if possible (eg, python_block if its python code) "
+        description="Literal text to memorize completely. Only use for plaintext to remember in full. Always use a more specific param if you can (eg, memorize a file path, dont cat the file and then memorize the text) This is very useful for taking your own notes!"
     )
     url = fields.String(
         required=False, 
-        description="URL to a web resource (page, pdf, etc) to memorize. Make sure the URL works first."
+        description="URL to a web resource (page, pdf, etc) to memorize. Make sure the URL works by using the shell first."
     )
     file_path = fields.String(
         required=False,
@@ -57,18 +57,18 @@ class MemoryRequest(Schema):
         required=False,
         description="Path to a directory on the local machine to memorize. Will memorize all files in directory. Make sure it exists by using the shell first."
     )
-    python_block = fields.String(
-        required=False,
-        description="Python code to memorize. ONLY use this if you need to memorize new python code. If the python code exists in a file or dir, use file_path or python_project_dir_path instead."
-    )
-    python_project_dir_path = fields.String(
-        required=False,
-        description="Path to a directory on the local machine containing a python project to memorize. Will memorize all python files in directory. Make sure it exists by using the shell first."
-    )
 
-class MemoryResult(Schema):
+class MemorizeResult(Schema):
     returncode = fields.Integer(required=True, description="The return code of the command. 0 means success, anything else means failure. If there's a failure, look at the error message to figure out what went wrong with the memory and either retry or ask the user for help.")
+    count = fields.Integer(required=True, description="The number of memories created. This is useful for debugging.")
     error = fields.String(required=False, description="The error that happened when creating the memory if there was one.")
+
+class RememberRequest(Schema):
+    query = fields.String(required=True, description="A natural-language search query on memories. If the user seems to be referencing something specific not in the chat history, try to find it with this. This makes you a much better assistant, so use it often!")
+
+class RememberResult(Schema):
+    document = fields.String(required=True, description="The document that was found. This is the raw text of the document. Read it carefully to extract good information from this yourself.")
+    metadata = fields.Dict(required=True, description="Metadata about the document. Contains *Very Useful Information* about the result (eg, where to find the code). Read it carefully to extract good information from this yourself.")
 
 components = [
     Task, 
@@ -80,6 +80,8 @@ components = [
     UrlResult,
     ShellRequest,
     ShellResult,
-    MemoryRequest,
-    MemoryResult
+    MemorizeRequest,
+    MemorizeResult,
+    RememberRequest,
+    RememberResult,
 ]

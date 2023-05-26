@@ -22,7 +22,13 @@ def add_routes(server, routes):
     resources = []
 
     for route in routes:
-        resources.append(route(server))
+        resource = route(server)
+
+        # TODO not exactly elegant, fix later
+        if not isinstance(resource, list):
+            resource = [resource]
+
+        resources.extend(resource)
     
     return resources
 

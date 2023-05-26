@@ -28,4 +28,6 @@ class DocumentRetriever(AbstractDocumentRetriever):
             self.db.add_document(item.document, item.metadata)
             
     def load(self, source: str):
-        self.index(self.extractor.extract(source))
+        items = self.extractor.extract(source)
+        self.index(items)
+        return items

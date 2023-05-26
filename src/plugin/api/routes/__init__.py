@@ -1,17 +1,17 @@
 from .datetime import datetime
-from .tasks import tasks
+from .tasks import task_routes
 from .search import search
 from .shell import shell
 from .url import url
 from .random_number import random_number
-from .memory import create_memory
+from .memory import memory 
 
 routes = [
     datetime,
-    *tasks,
+    *task_routes,
     search,
     shell,
     url,
     random_number,
-    create_memory,
+    memory,
 ]
