@@ -1,1 +1,4 @@
-The GPT Toolbox is a powerful plugin designed to augment the capabilities of the GPT AI. It serves as a multi-functional assistant that can perform a variety of tasks. It has the ability to memorize and recall information, whether its a piece of text, a file on your computer, or a webpage, making it a reliable digital notebook. It can execute commands on your computer, acting like a digital handyman. Its also a proficient web researcher, capable of finding information on any topic you need. The toolbox shines as a task manager, allowing you to create, update, and manage tasks efficiently. Lastly, it can access and retrieve specific information from webpages, serving as a personal librarian. In summary, the GPT Toolbox is your personal assistant, researcher, handyman, and librarian, all in one, enhancing your productivity and making your tasks easier.
+**GPT Toolbox (alpha)**  
+https://github.com/jnaglick/gpt-toolbox  
+
+The GPT Toolbox is a powerful plugin designed to augment the capabilities of the GPT AI. It serves as a multi-functional assistant that can perform a variety of tasks. It has the ability to memorize and recall information, whether it\s
