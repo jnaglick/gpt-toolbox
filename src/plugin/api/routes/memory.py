@@ -24,7 +24,7 @@ class PluginRetriever(DocumentRetriever):
 
 def memory(server):
     retriever = PluginRetriever(server.context.db)
-    console.log(f"Plugin Retriever initialized with {retriever.db.collection.count()} memories")
+    console.log(f"Plugin Retriever initialized with {retriever.db.collection.count()} items")
 
     @server.route("/create_memory", methods=["POST"])
     def _create_memory():
