@@ -2,6 +2,10 @@ from agents import WebInformedAgent
 from utils import wandb_autolog
 from llm import ChatSession
 
+from plugin import start_server
+
+start_server()
+
 # questions that dont require web access
 noop_benchmarks = [
     "Name the capital city of France.",
@@ -34,10 +38,11 @@ check = [
     ["When does your training data end?"] # sept 2021
 ]
 
-with ChatSession() as session:
+""" with ChatSession() as session:
     with wandb_autolog():
         web_agent = WebInformedAgent("Main", session)
 
         prediction = web_agent.prediction("Who won the Academy Award for Best Actor in 2023 and who lost the MLB world series in 2022?")
 
-        print(prediction)
+        print(prediction) """
+ 
