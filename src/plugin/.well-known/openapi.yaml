@@ -21,23 +21,71 @@ components:
       - status
       - task
       type: object
-    EmbeddingRequest:
+    MemorizeRequest:
       properties:
-        input_data:
-          description: The input data for creating the embedding.
+        dir_path:
+          description: Path to a directory on the local machine to memorize. Will
+            memorize all files in directory. Make sure it exists by using the shell
+            first.
+          type: string
+        file_path:
+          description: Path to a file on the local machine to memorize. Make sure
+            the file exists by using the shell first.
+          type: string
+        text:
+          description: Literal text to memorize completely. Only use for plaintext
+            to remember in full. Always use a more specific param if you can (eg,
+            memorize a file path, dont cat the file and then memorize the text) This
+            is very useful for taking your own notes!
+          type: string
+        url:
+          description: URL to a web resource (page, pdf, etc) to memorize. Make sure
+            the URL works by using the shell first.
+          type: string
+      type: object
+    MemorizeResult:
+      properties:
+        count:
+          description: The number of memories created. This is useful for debugging.
+          type: integer
+        error:
+          description: The error that happened when creating the memory if there was
+            one.
+          type: string
+        returncode:
+          description: The return code of the command. 0 means success, anything else
+            means failure. If there's a failure, look at the error message to figure
+            out what went wrong with the memory and either retry or ask the user for
+            help.
+          type: integer
+      required:
+      - count
+      - returncode
+      type: object
+    RememberRequest:
+      properties:
+        query:
+          description: A natural-language search query on memories. If the user seems
+            to be referencing something specific not in the chat history, try to find
+            it with this. This makes you a much better assistant, so use it often!
           type: string
       required:
-      - input_data
+      - query
       type: object
-    EmbeddingResult:
+    RememberResult:
       properties:
-        embedding:
-          description: The created embedding.
-          items:
-            type: number
-          type: array
+        document:
+          description: The document that was found. This is the raw text of the document.
+            Read it carefully to extract good information from this yourself.
+          type: string
+        metadata:
+          description: Metadata about the document. Contains *Very Useful Information*
+            about the result (eg, where to find the code). Read it carefully to extract
+            good information from this yourself.
+          type: object
       required:
-      - embedding
+      - document
+      - metadata
       type: object
     SearchRequest:
       properties:
@@ -149,22 +197,24 @@ info:
   version: v1
 openapi: 3.0.2
 paths:
-  /create_embedding:
+  /create_memory:
     post:
-      operationId: create_embedding
+      operationId: create_memory
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EmbeddingRequest'
+              $ref: '#/components/schemas/MemorizeRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmbeddingResult'
-          description: The created embedding.
-      summary: Create an embedding for the given input data.
+                $ref: '#/components/schemas/MemorizeResult'
+          description: What happened when creating the memory.
+      summary: Memorizes something. It's very important to use the right request param
+        so the system knows how to memorize it. Before you memorize, think step by
+        step about exactly what to memorize and how.
   /datetime:
     get:
       operationId: datetime
@@ -191,6 +241,26 @@ paths:
                 type: integer
           description: A random integer between 1 and 100.
       summary: Get a random integer between 1 and 100.
+  /remember:
+    post:
+      operationId: remember
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RememberRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RememberResult'
+          description: The memory that was found, if any. If nothing was found, try
+            again with a much different query, or better yet, ask the user for clarification.
+            If an error is returned, dont try again.
+      summary: Remember something you memorized previously. If the user seems to be
+        referencing something specific not in the chat history, try to find it with
+        this. This makes you a much better assistant, so use it often!
   /search:
     post:
       operationId: search

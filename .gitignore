@@ -3,3 +3,4 @@ venv
 wandb
 .DS_Store
 .chromadb
+.pytest_cache

@@ -27,11 +27,11 @@ def _generate_embedding(text):
     return [generate_embedding(text)]
 
 class Chroma(AbstractDocumentDatabase):
-    def __init__(self, database_name):
+    def __init__(self, database_name, persist_directory):
         # TODO dont hardcode to local
         self.client = chromadb.Client(Settings(
             chroma_db_impl="duckdb+parquet",
-            persist_directory=".chromadb"
+            persist_directory=persist_directory,
         ))
         self.collection = self.client.get_or_create_collection(
             name=database_name,
@@ -42,6 +42,7 @@ class Chroma(AbstractDocumentDatabase):
     def add_document(self, document, metadata=None):
         doc_id = str(uuid.uuid4())
         self.collection.add(documents=document, metadatas=metadata, ids=doc_id)
+        return doc_id
 
     def query(self, query, metadata_filter=None, max_results=None) -> QueryResults:
         args = dict(

@@ -6,4 +6,4 @@ def start_server():
 
     create_openapi_spec(server_instance, resources, schema_components)
     
-    server_instance.run(debug=True, port=3333)
+    server_instance.run(port=3333, use_reloader=False)

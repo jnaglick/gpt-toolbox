@@ -1,7 +1,14 @@
+from dataclasses import dataclass
+
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 
+from db import Chroma, AbstractDocumentDatabase
 from .routes import routes
+
+@dataclass
+class ServerContext:
+    db: AbstractDocumentDatabase
 
 def add_routes(server, routes):
     @server.route('/openapi.yaml')
@@ -15,12 +22,24 @@ def add_routes(server, routes):
     resources = []
 
     for route in routes:
-        resources.append(route(server))
+        resource = route(server)
+
+        # TODO not exactly elegant, fix later
+        if not isinstance(resource, list):
+            resource = [resource]
+
+        resources.extend(resource)
     
     return resources
 
 def server():
     server = Flask(__name__)
+
+    chroma = Chroma('toolbox-memory-general', "/Users/jmn/chroma/toolbox-memory-general")
+
+    server.context = ServerContext(
+       db=chroma
+    )
 
     CORS(server)
 

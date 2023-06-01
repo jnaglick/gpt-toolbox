@@ -1,10 +1,9 @@
 import ast
 import fnmatch
-from typing import List
 from radon.raw import analyze
 
-from .document_extractor import DocumentExtractorResult
-from .filesys_extractor import FilesysExtractor
+from .document_extractor import DocumentExtractor, to_documents
+from .filesys_extractor import FileExtractor, DirectoryExtractor
 
 class PythonNodeExtractor:
     node_type = None
@@ -37,20 +36,19 @@ class PythonNodeExtractor:
 
     def extract(self, node, additional_metadata=None):
         if self.condition(node):
-            return [DocumentExtractorResult(
-                document=self.document(node),
-                metadata=self.metadata(node, additional_metadata)
-            )]
+            return to_documents(self.document(node), self.metadata(node, additional_metadata))
         else:
             return []
 
 class CodeExtractor(PythonNodeExtractor):
     output_type = "code"
+
     def document(self, node):
         return ast.unparse(node)
 
 class AstExtractor(PythonNodeExtractor):
     output_type = "ast"
+
     def document(self, node):
         return ast.dump(node)
 
@@ -112,7 +110,7 @@ class CommentExtractor(PythonNodeExtractor):
     def document(self, node):
         return node.value.s
 
-EXTRACTORS = [
+NODE_EXTRACTORS = [
     ModuleExtractor(),
     ModuleAstExtractor(),
     FunctionExtractor(),
@@ -129,12 +127,9 @@ EXTRACTORS = [
     # AttributeAccessExtractor(),
 ]
 
-class PythonExtractor(FilesysExtractor):
-    def __init__(self, extractors: List[PythonNodeExtractor]=None):
-        super().__init__(extractors or EXTRACTORS)
-
-    def should_extract_file(self, file_path):
-        return fnmatch.fnmatch(file_path, "*.py")
+class PythonExtractor(DocumentExtractor):
+    def __init__(self):
+        super().__init__(NODE_EXTRACTORS)
 
     def extract(self, source_code, additional_metadata_for_node=None):
         try:
@@ -155,3 +150,14 @@ class PythonExtractor(FilesysExtractor):
             extracted.extend(super().extract(node, additional_metadata_for_node))
 
         return extracted
+
+class PythonFileExtractor(FileExtractor):
+    def __init__(self):
+        super().__init__([PythonExtractor()])
+    
+    def condition(self, file_path):
+        return fnmatch.fnmatch(file_path, "*.py")
+
+class PythonProjectExtractor(DirectoryExtractor):
+    def __init__(self):
+        super().__init__([PythonFileExtractor()])
