@@ -12,7 +12,7 @@
       "url": "http://localhost:3333/openapi.yaml",
       "is_user_authenticated": false
   },
-  "logo_url": "",
+  "logo_url": "http://localhost:3333/logo.png",
   "contact_email": "jnaglick@gmail.com",
   "legal_info_url": ""
 }

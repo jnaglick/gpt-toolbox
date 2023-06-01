@@ -19,6 +19,10 @@ def add_routes(server, routes):
     def serve_ai_plugin():
         return send_from_directory('../.well-known/', 'ai-plugin.json')
 
+    @server.route('/logo.png')
+    def serve_ico():
+        return send_from_directory('../.well-known/', 'logo.png')
+
     resources = []
 
     for route in routes:
