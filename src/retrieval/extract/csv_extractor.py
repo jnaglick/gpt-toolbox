@@ -1,11 +1,10 @@
 import csv
+import fnmatch
 
-from .document_extractor import DocumentExtractor, to_documents
+from .document_extractor import DocumentExtractor
 from .filesys_extractor import FileExtractor
 
-# TODO this could be made more reusable/modular by calling super().extract() with the actual row
-#      instead of the massaged "header: value\n" document text.
-class CsvRowExtractor(DocumentExtractor):
+class CsvExtractor(DocumentExtractor):
     def extract(self, source, additional_metadata=None):
         results = []
         reader = csv.reader(source.splitlines())
@@ -23,7 +22,7 @@ class CsvRowExtractor(DocumentExtractor):
 
 class CsvFileExtractor(FileExtractor):
     def __init__(self):
-        super().__init__([CsvRowExtractor()])
+        super().__init__([CsvExtractor()])
 
     def condition(self, file_path):
-        return file_path.endswith('.csv')
+        return fnmatch.fnmatch(file_path, "*.csv")

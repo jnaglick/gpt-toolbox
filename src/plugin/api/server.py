@@ -1,10 +1,10 @@
+from dataclasses import dataclass
+
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 
 from db import Chroma, AbstractDocumentDatabase
 from .routes import routes
-
-from dataclasses import dataclass
 
 @dataclass
 class ServerContext:
@@ -35,11 +35,10 @@ def add_routes(server, routes):
 def server():
     server = Flask(__name__)
 
-    chroma = Chroma('memory')
+    chroma = Chroma('toolbox-memory-general', "/Users/jmn/chroma/toolbox-memory-general")
 
-    # TODO why isnt @server.before_first_request working?
     server.context = ServerContext(
-        db=chroma
+       db=chroma
     )
 
     CORS(server)

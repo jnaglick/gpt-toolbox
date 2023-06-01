@@ -2,25 +2,32 @@ from flask import abort, request, jsonify
 
 from console import console
 from retrieval import DocumentRetriever
-from retrieval.extract import DirectoryExtractor, FileExtractor, CsvFileExtractor, PythonFileExtractor
+from retrieval.extract import DocumentExtractor, FileExtractor, DirectoryExtractor, CsvFileExtractor, PythonFileExtractor
 
 class PluginRetriever(DocumentRetriever):
     def __init__(self, db):
         super().__init__(db)
+        # this looks wonky, you'd expect to see a FileExtractor here. This is because the *FileExtractor classes has the condition() in them. Fix this.
+        self.file_extractor = DocumentExtractor([
+            FileExtractor(),
+            CsvFileExtractor(),
+            PythonFileExtractor(),
+        ])
         self.directory_extractor = DirectoryExtractor([
             FileExtractor(),
             CsvFileExtractor(),
             PythonFileExtractor(),
         ])
 
+    def load_file(self, source: str):
+        items = self.file_extractor.extract(source)
+        console.verbose(f"Extracted {len(items)} items from file: {source}")
+        return self.index(items)
+
     def load_directory(self, source: str):
         items = self.directory_extractor.extract(source)
-        self.index(items)
-        return items
-
-# text = retriever.load(text)
-# file = ???
-# dir = retriever.load_directory(source)
+        console.verbose(f"Extracted {len(items)} items from directory: {source}")
+        return self.index(items)
 
 def memory(server):
     retriever = PluginRetriever(server.context.db)
@@ -61,6 +68,9 @@ def memory(server):
             if 'text' in request.json:
                 memories = retriever.load(request.json['text'])
 
+            if 'file_path' in request.json:
+                memories = retriever.load_file(request.json['file_path'])
+
             if 'dir_path' in request.json:
                 memories = retriever.load_directory(request.json['dir_path'])
 
@@ -90,7 +100,7 @@ def memory(server):
                             $ref: "#/components/schemas/RememberRequest"
             responses:
                 200:
-                    description: The memory that was found, if any. If nothing was found, try again with a much different query, or better yet, ask the user for clarification.
+                    description: The memory that was found, if any. If nothing was found, try again with a much different query, or better yet, ask the user for clarification. If an error is returned, dont try again.
                     content:
                         application/json:
                             schema:
@@ -99,8 +109,9 @@ def memory(server):
         if not request.json or 'query' not in request.json:
             abort(400)
 
-        result = retriever.query(request.json['query'], max_results=1)
+        result = retriever.query(request.json['query'])
 
+        # fix list index out of range
         return jsonify({
             "document": result[0].document,
             "metadata": result[0].metadata,

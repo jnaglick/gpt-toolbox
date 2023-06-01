@@ -15,6 +15,8 @@ class FileExtractor(DocumentExtractor):
         return True
 
     def extract(self, file_path, additional_metadata = None) -> List[DocumentExtractorResult]:
+        file_path = os.path.abspath(file_path)
+
         if not self.condition(file_path):
             return []
 

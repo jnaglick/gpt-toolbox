@@ -26,7 +26,9 @@ class DocumentRetriever(AbstractDocumentRetriever):
     def index(self, items: List[DocumentExtractorResult]):
         for item in tqdm(items, desc="Adding documents to store"):
             self.db.add_document(item.document, item.metadata)
-            
+        self.db.client.persist() # TODO necessary?
+        return items
+
     def load(self, source: str):
         items = self.extractor.extract(source)
         self.index(items)

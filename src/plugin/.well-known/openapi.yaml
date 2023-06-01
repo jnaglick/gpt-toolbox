@@ -257,6 +257,7 @@ paths:
                 $ref: '#/components/schemas/RememberResult'
           description: The memory that was found, if any. If nothing was found, try
             again with a much different query, or better yet, ask the user for clarification.
+            If an error is returned, dont try again.
       summary: Remember something you memorized previously. If the user seems to be
         referencing something specific not in the chat history, try to find it with
         this. This makes you a much better assistant, so use it often!

@@ -1,8 +1,8 @@
 import pytest
-from .csv_extractor import CsvRowExtractor, CsvFileExtractor
+from .csv_extractor import CsvExtractor, CsvFileExtractor
 
 def test_csv_extractor():
-    extractor = CsvRowExtractor()
+    extractor = CsvExtractor()
     source = 'h1,h2,h3\na,b,c\nd,e,f'
 
     results = extractor.extract(source)
