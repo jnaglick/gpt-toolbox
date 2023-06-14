@@ -48,12 +48,22 @@ class DocumentExtractor(AbstractDocumentExtractor):
 
         self.extractors = extractors
 
-    def extract(self, 
-                source: str, 
-                additional_metadata: DocumentMetadata = None) -> DocumentExtractorResults:
+    def condition(self, source: str, additional_metadata: DocumentMetadata) -> bool:
+        return True
+
+    def run_extract(self, # TODO rename
+                    source: str, 
+                    additional_metadata: DocumentMetadata = None) -> DocumentExtractorResults:
         extracted = []
 
         for extractor in self.extractors:
             extracted.extend(extractor.extract(source, additional_metadata))
 
         return extracted
+
+    def extract(self, 
+                source: str, 
+                additional_metadata: DocumentMetadata = None) -> DocumentExtractorResults:
+        if not self.condition(source, additional_metadata):
+            return []
+        return self.run_extract(source, additional_metadata)

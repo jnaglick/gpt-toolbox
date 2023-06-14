@@ -131,7 +131,7 @@ class PythonExtractor(DocumentExtractor):
     def __init__(self):
         super().__init__(NODE_EXTRACTORS)
 
-    def extract(self, source_code, additional_metadata_for_node=None):
+    def run_extract(self, source_code, additional_metadata_for_node=None):
         try:
             tree = ast.parse(source_code)
         except SyntaxError as e:
@@ -147,7 +147,7 @@ class PythonExtractor(DocumentExtractor):
         extracted = []
 
         for node in ast.walk(tree):
-            extracted.extend(super().extract(node, additional_metadata_for_node))
+            extracted.extend(super().run_extract(node, additional_metadata_for_node))
 
         return extracted
 
@@ -155,7 +155,7 @@ class PythonFileExtractor(FileExtractor):
     def __init__(self):
         super().__init__([PythonExtractor()])
     
-    def condition(self, file_path):
+    def condition(self, file_path, additional_metadata):
         return fnmatch.fnmatch(file_path, "*.py")
 
 class PythonProjectExtractor(DirectoryExtractor):

@@ -11,14 +11,8 @@ def file_metadata(file_path):
     }
 
 class FileExtractor(DocumentExtractor):
-    def condition(self, file_path):
-        return True
-
-    def extract(self, file_path, additional_metadata = None) -> List[DocumentExtractorResult]:
+    def run_extract(self, file_path, additional_metadata = None) -> List[DocumentExtractorResult]:
         file_path = os.path.abspath(file_path)
-
-        if not self.condition(file_path):
-            return []
 
         try:
           with open(file_path, 'r', encoding='utf-8') as f:
@@ -26,7 +20,7 @@ class FileExtractor(DocumentExtractor):
               metadata = file_metadata(file_path)
               if additional_metadata is not None:
                   metadata.update(additional_metadata)
-              return super().extract(document, metadata)
+              return super().run_extract(document, metadata)
         except UnicodeDecodeError:
             # TODO handle
             return []
@@ -41,12 +35,12 @@ class DirectoryExtractor(DocumentExtractor):
 
         super().__init__(extractors)
 
-    def extract(self, directory, additional_metadata = None) -> List[DocumentExtractorResult]:
+    def run_extract(self, directory, additional_metadata = None) -> List[DocumentExtractorResult]:
         extracted = []
 
         for root, dirs, files in os.walk(directory):
             for file_name in files:
                 absolute_file_path = os.path.join(os.path.abspath(root), file_name)
-                extracted.extend(super().extract(absolute_file_path, additional_metadata))
+                extracted.extend(super().run_extract(absolute_file_path, additional_metadata))
 
         return extracted

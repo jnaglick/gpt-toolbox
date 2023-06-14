@@ -1,2 +1,2 @@
 test:
-	pytest src
+	pytest -s src

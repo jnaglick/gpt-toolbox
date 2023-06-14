@@ -13,6 +13,15 @@ def test_csv_extractor():
     assert results[1].document == 'h1: d\nh2: e\nh3: f'
     assert results[1].metadata['rownum'] == 1
 
+def test_csv_condition():
+    extractor = CsvExtractor()
+
+    invalid_source_empty = ''
+    assert extractor.extract(invalid_source_empty, None) == []
+
+    invalid_source_mismatched_fields = 'h1,h2,h3\na,b\nd,e,f'
+    assert extractor.extract(invalid_source_mismatched_fields, None) == []
+
 def test_csv_file_extractor(tmp_path):
     d = tmp_path / 'sub'
     d.mkdir()
@@ -32,3 +41,4 @@ def test_csv_file_extractor(tmp_path):
     assert results[1].metadata['rownum'] == 1
     assert results[0].metadata['file_name'] == 'hello.csv'
     assert results[0].metadata['file_path'] == str(p)
+

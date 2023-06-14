@@ -42,13 +42,20 @@ def test_document_extractor():
     assert result[0].document == source
     assert result[0].metadata["author"] == metadata["author"]
 
-class TestDocumentExtractor(SimpleDocumentExtractor):
-    def extract(self, source, additional_metadata):
+class NoopSubDocumentExtractor(DocumentExtractor):
+    def condition(self, source, additional_metadata) -> bool:
+        return False
+
+    def run_extract(self, source, additional_metadata):
+        return to_documents("should not appear")
+
+class SubDocumentExtractor(DocumentExtractor):
+    def run_extract(self, source, additional_metadata):
         return to_documents("test", {"test": "test"})
 
 def test_document_extractor_with_sub_extractors():
     # arrange
-    extractor = DocumentExtractor([SimpleDocumentExtractor(), TestDocumentExtractor()])
+    extractor = DocumentExtractor([SimpleDocumentExtractor(), SubDocumentExtractor(), NoopSubDocumentExtractor()])
     source = "test document"
     metadata = {"author": "test author"}
 
