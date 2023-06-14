@@ -2,7 +2,7 @@ from flask import abort, request, jsonify
 
 from console import console
 from retrieval import DocumentRetriever
-from retrieval.extract import DocumentExtractor, FileExtractor, DirectoryExtractor, CsvFileExtractor, PythonFileExtractor
+from retrieval.extract import DocumentExtractor, FileExtractor, DirectoryExtractor, CsvFileExtractor, PythonFileExtractor, WebExtractor
 
 class PluginRetriever(DocumentRetriever):
     def __init__(self, db):
@@ -18,6 +18,7 @@ class PluginRetriever(DocumentRetriever):
             CsvFileExtractor(),
             PythonFileExtractor(),
         ])
+        self.web_extractor = WebExtractor()
 
     def load_file(self, source: str):
         items = self.file_extractor.extract(source)
@@ -27,6 +28,11 @@ class PluginRetriever(DocumentRetriever):
     def load_directory(self, source: str):
         items = self.directory_extractor.extract(source)
         console.verbose(f"Extracted {len(items)} items from directory: {source}")
+        return self.index(items)
+
+    def load_url(self, source: str):
+        items = self.web_extractor.extract(source)
+        console.verbose(f"Extracted {len(items)} items from url: {source}")
         return self.index(items)
 
 def memory(server):
@@ -73,6 +79,9 @@ def memory(server):
 
             if 'dir_path' in request.json:
                 memories = retriever.load_directory(request.json['dir_path'])
+
+            if 'url' in request.json:
+                memories = retriever.load_url(request.json['url'])
 
             return jsonify({
                 "returncode": 0,
