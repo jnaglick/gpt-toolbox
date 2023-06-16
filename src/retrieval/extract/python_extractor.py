@@ -112,13 +112,13 @@ class CommentExtractor(PythonNodeExtractor):
 
 NODE_EXTRACTORS = [
     ModuleExtractor(),
-    ModuleAstExtractor(),
+    # ModuleAstExtractor(),
     FunctionExtractor(),
-    FunctionAstExtractor(),
+    # FunctionAstExtractor(),
     MethodExtractor(),
-    MethodAstExtractor(),
+    # MethodAstExtractor(),
     ClassExtractor(),
-    ClassAstExtractor(),
+    # ClassAstExtractor(),
     # ImportExtractor(),
     CommentExtractor(),
     # DecoratorExtractor(),
