@@ -1,6 +1,6 @@
 from flask import abort, request, jsonify
 
-from console import console
+from utils import console
 from retrieval import DocumentRetriever
 from retrieval.extract import DocumentExtractor, FileExtractor, DirectoryExtractor, CsvFileExtractor, PythonFileExtractor, WebExtractor
 

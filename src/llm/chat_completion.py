@@ -1,7 +1,6 @@
 import openai
 
-from console import console
-from utils import env
+from utils import console, env
 
 from .count_tokens import count_tokens
 from .model_specs import get_model_spec, ModelType

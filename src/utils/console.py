@@ -1,6 +1,6 @@
 from rich.console import Console as RichConsole
 
-from utils import env
+from .env import env
 
 DEFAULT_LOG_LEVEL = 'VERBOSE'
 

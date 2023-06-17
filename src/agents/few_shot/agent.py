@@ -1,4 +1,4 @@
-from console import console
+from utils import console
 from llm import chat_completion, ChatSession, get_model_spec, ModelType
 
 DEFAULT_SYSTEM = """

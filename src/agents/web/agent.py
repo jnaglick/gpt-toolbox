@@ -1,15 +1,15 @@
 # agent with the ability to search the web
-from agents.few_shot import FewShotAgent, RelevenceSummaryAgent
+from agents.few_shot import FewShotAgent, RelevanceSummaryAgent
 from utils import duckduckgo, web_request
 
 from .parse_completion import parse_completion
 from .prompts import system, examples, user
 from .prompts.special_tokens import SECTION_ANSWER, SECTION_WEB_SEARCH
 
-def search_action(search_term, relevance_summary):
+def search_action(search_term, relevance_summary_fn):
     search_results = duckduckgo(search_term, num_results=3)
     page_results = [web_request(url) for _, url in search_results]
-    relevance_summaries = [relevance_summary(search_term, content) for content in page_results]
+    relevance_summaries = [relevance_summary_fn(search_term, content) for content in page_results]
 
     return [
         (title, url, summary)
@@ -20,7 +20,7 @@ class WebInformedAgent(FewShotAgent):
     def __init__(self, name, session):
         super().__init__(name, session)
         self.context_items = []
-        self.relevance_summary_agent = RelevenceSummaryAgent(f"{name}/RelevanceSummary", session)
+        self.relevance_summary_agent = RelevanceSummaryAgent(f"{name}/RelevanceSummary", session)
 
     def add_to_context(self, action, action_input, action_result):
         self.context_items.insert(0, (action, action_input, action_result))

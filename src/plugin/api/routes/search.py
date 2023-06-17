@@ -1,20 +1,22 @@
-from utils import duckduckgo, web_request
-
 from flask import jsonify, request, abort
 
-def search_action(search_term, num_results):
-    search_results = duckduckgo(search_term, num_results)
-    page_results = [web_request(url) for _, url in search_results]
+from agents.few_shot import RelevanceSummaryAgent
+from utils import web_search
+
+def search_action(search_term, agent):
+    search_results = web_search(search_term, num_results=5, relevance_summary_fn=agent.prediction)
 
     return [
         {
             'title': title,
             'url': url,
             'body': body
-        } for (title, url), body in zip(search_results, page_results)
+        } for title, url, body in search_results
     ]
 
 def search(server):
+    relevance_summary_agent = RelevanceSummaryAgent("plugin /search")
+
     @server.route('/search', methods=['POST'])
     def _search():
         """
@@ -42,6 +44,6 @@ def search(server):
         if not request.json or 'query' not in request.json:
             abort(400)
 
-        return jsonify(search_action(request.json['query'], num_results=3)), 200
+        return jsonify(search_action(request.json['query'], relevance_summary_agent)), 200
   
     return _search

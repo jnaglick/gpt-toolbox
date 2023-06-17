@@ -1,4 +1,4 @@
-from console import console
+from utils import console
 
 from .chat_completion import (
     chat_completion,

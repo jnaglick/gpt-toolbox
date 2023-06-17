@@ -2,7 +2,7 @@ from plugin import start_server
 
 start_server()
 
-# from agents import WebInformedAgent
+# from agents.web import WebInformedAgent
 # from utils import wandb_autolog
 # from llm import ChatSession
 
