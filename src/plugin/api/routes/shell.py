@@ -17,7 +17,7 @@ def shell(server):
                             $ref: '#/components/schemas/ShellRequest'
             responses:
                 200:
-                    description: Search result
+                    description: Shell result
                     content:
                         application/json:
                             schema:
