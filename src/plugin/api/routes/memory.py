@@ -120,7 +120,11 @@ def memory(server):
 
         result = retriever.query(request.json['query'])
 
-        # fix list index out of range
+        if len(result) == 0:
+            return jsonify({
+                "document": "No results found. Try another query.",
+            })
+
         return jsonify({
             "document": result[0].document,
             "metadata": result[0].metadata,
