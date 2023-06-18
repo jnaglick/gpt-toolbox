@@ -5,6 +5,7 @@ from .shell import shell
 from .url import url
 from .random_number import random_number
 from .memory import memory 
+from .vim_ex import vim_ex
 
 routes = [
     datetime,
@@ -14,4 +15,5 @@ routes = [
     url,
     random_number,
     memory,
+    vim_ex,
 ]
