@@ -276,6 +276,22 @@ components:
       required:
       - body
       type: object
+    VimExRequest:
+      properties:
+        commands:
+          description: The Vim Ex mode commands to run on the users machine. ATTN!
+            editing lines with %s// has a very high environment cost. ALWAYS Use Multiple
+            delete+inserts (del Nth line, command sep, ins Nth line)
+          items:
+            type: string
+          type: array
+        file_name:
+          description: The file name to operate on.
+          type: string
+      required:
+      - commands
+      - file_name
+      type: object
 info:
   description: A ChatGPT plugin API for the GPT Toolbox
   title: GPT Toolbox API
