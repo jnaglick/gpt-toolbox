@@ -155,6 +155,10 @@ class PythonFileExtractor(FileExtractor):
     def __init__(self):
         super().__init__([PythonExtractor()])
     
+    @staticmethod
+    def s_condition(file_path, additional_metadata):
+        return fnmatch.fnmatch(file_path, "*.py")
+
     def condition(self, file_path, additional_metadata):
         return fnmatch.fnmatch(file_path, "*.py")
 
