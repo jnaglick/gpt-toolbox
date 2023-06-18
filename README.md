@@ -10,7 +10,7 @@ A system that augments GPT with general purpose tools. Currently implemented via
 
     - **GPT4 plugin developer access**: Be subscribed to "Plus" and join the waitlist for plugin dev https://openai.com/waitlist/plugins
 
-      - It seems some people get in much sooner than others. I speculate that using the 3.5 API might get you "noticed". Try other projects and check out the `agents` module
+      - It seems some people get in much sooner than others. It's possible using the 3.5 API can get you flagged for access, so try other projects and check out the `agents` module until you do.
 
 2. Init the project: `make init`
 
