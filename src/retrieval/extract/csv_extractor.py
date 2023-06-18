@@ -37,5 +37,9 @@ class CsvFileExtractor(FileExtractor):
     def __init__(self):
         super().__init__([CsvExtractor()])
 
+    @staticmethod
+    def s_condition(file_path, additional_metadata):
+        return fnmatch.fnmatch(file_path, "*.csv")
+
     def condition(self, file_path, additional_metadata):
         return fnmatch.fnmatch(file_path, "*.csv")

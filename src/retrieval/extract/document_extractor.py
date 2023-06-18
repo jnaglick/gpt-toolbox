@@ -54,12 +54,12 @@ class DocumentExtractor(AbstractDocumentExtractor):
     def run_extract(self, # TODO rename
                     source: str, 
                     additional_metadata: DocumentMetadata = None) -> DocumentExtractorResults:
-        extracted = []
+        result = []
 
-        for extractor in self.extractors:
-            extracted.extend(extractor.extract(source, additional_metadata))
+        for e in self.extractors:
+            result.extend(e.extract(source, additional_metadata))
 
-        return extracted
+        return result
 
     def extract(self, 
                 source: str, 
