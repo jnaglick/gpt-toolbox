@@ -1,4 +1,6 @@
-from utils import run_shell_command
+import shlex
+
+from utils import console, run_shell_command
 
 from flask import jsonify, request, abort
 
@@ -9,7 +11,7 @@ def vim_ex(server):
         ---
         post:
             operationId: vim_ex
-            summary: Run a series of Vim commands in Ex mode on the user's machine and get the results (the final "wq" is supplied automatically). ATTENTION ALWAYS Use This To Edit Files - NEVER Use the Shell Tool!
+            summary: Run Vim commands in Ex mode (Regular Expressions Disabled) on the user's machine (the final -c "wq" is supplied automatically). ATTENTION ALWAYS Use This To Edit Files - NEVER Use the Shell Tool!
             requestBody:
                 content:
                     application/json:
@@ -27,11 +29,19 @@ def vim_ex(server):
                 400:
                     description: Invalid input. The request must be a JSON and contain 'commands' and 'file_name' fields.
         """
+        console.verbose(f"vim_ex request: {request.json}")
+
         if not request.json or 'commands' not in request.json or 'file_name' not in request.json:
             abort(400)
 
-        vim_commands = ' '.join(f'-c "{command}"' for command in request.json["commands"])
+        commands = [shlex.quote(command) for command in request.json["commands"]] # shell escape each command
+ 
+        vim_commands = ' '.join(f'-c {command}' for command in commands)
+ 
         vim_command = f'vim -es -u NONE {vim_commands} -c "wq" {request.json["file_name"]}'
+        
+        console.verbose(f"vim_ex running vim command: `{vim_command}`")
+
         return jsonify(run_shell_command(vim_command)), 200
   
     return _vim_ex

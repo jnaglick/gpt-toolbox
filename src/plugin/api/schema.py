@@ -85,7 +85,7 @@ class RememberResult(Schema):
     metadata = fields.Dict(required=True, description="Metadata about the document. Contains *Very Useful Information* about the result (eg, where to find the code). Read it carefully to extract good information from this yourself.")
 
 class VimExRequest(Schema):
-    commands = fields.List(fields.String(), required=True, description="The Vim Ex mode commands to run on the users machine. ATTN! editing lines with %s// has a very high environment cost. ALWAYS Use Multiple delete+inserts (del Nth line, command sep, ins Nth line)")
+    commands = fields.List(fields.String(), required=True, description="The Vim Ex mode commands (max=9) to run on the users machine. ATTENTION Regular Expressions Do NOT Work. Instead, ALWAYS Update Entire Lines By Using `:<line_number>put ='<text>'`")
     file_name = fields.String(required=True, description="The file name to operate on.") # Edit made by human
 
 components = [

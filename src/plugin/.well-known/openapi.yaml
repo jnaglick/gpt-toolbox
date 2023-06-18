@@ -279,9 +279,9 @@ components:
     VimExRequest:
       properties:
         commands:
-          description: The Vim Ex mode commands to run on the users machine. ATTN!
-            editing lines with %s// has a very high environment cost. ALWAYS Use Multiple
-            delete+inserts (del Nth line, command sep, ins Nth line)
+          description: The Vim Ex mode commands (max=9) to run on the users machine.
+            ATTENTION Regular Expressions Do NOT Work. Instead, ALWAYS Update Entire
+            Lines By Using `:<line_number>put ='<text>'`
           items:
             type: string
           type: array
@@ -567,8 +567,8 @@ paths:
         '400':
           description: Invalid input. The request must be a JSON and contain 'commands'
             and 'file_name' fields.
-      summary: Run a series of Vim commands in Ex mode on the user's machine and get
-        the results (the final "wq" is supplied automatically). ATTENTION ALWAYS Use
+      summary: Run Vim commands in Ex mode (Regular Expressions Disabled) on the user's
+        machine (the final -c "wq" is supplied automatically). ATTENTION ALWAYS Use
         This To Edit Files - NEVER Use the Shell Tool!
 servers:
 - url: http://localhost:3333

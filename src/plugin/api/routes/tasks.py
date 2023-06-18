@@ -10,7 +10,7 @@ def create_task_script(code, task_uuid):
     with open(script_filename, "w") as script_file:
         script_file.write(code)
 
-    console.verbose(f"Created/Updated task: {task_uuid}")
+    console.verbose(f"Task {task_uuid} has been created or updated successfully")
 
 class TaskService:
     def __init__(self):
@@ -62,7 +62,7 @@ class TaskService:
     
     def run_task(self, task_uuid, args=''):
         script_filename = f"{task_uuid}.py"
-        console.verbose(f"Running task: {task_uuid}")
+        console.verbose(f"Initiating execution of task: {task_uuid}")
         return run_shell_command(f"python3 {script_filename} {args}")
 
 task_service = TaskService()
