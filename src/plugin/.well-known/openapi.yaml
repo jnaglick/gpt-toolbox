@@ -256,11 +256,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/RememberResult'
           description: The memory that was found, if any. If nothing was found, try
-            again with a much different query, or better yet, ask the user for clarification.
-            If an error is returned, dont try again.
-      summary: Remember something you memorized previously. If the user seems to be
-        referencing something specific not in the chat history, try to find it with
-        this. This makes you a much better assistant, so use it often!
+            again with a much different query.
+      summary: Recalls important things, code and data from the local filesystem and
+        remote locations, and your own past notes. This functionality makes you a
+        MUCH Better Assistant, so use it as often as possible!
   /search:
     post:
       operationId: search
@@ -313,10 +312,12 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Task'
+                  $ref: '#/components/schemas/TaskWithoutCode'
                 type: array
-          description: List of Task items
-      summary: List all Task items
+          description: List of Tasks without code.
+      summary: Lists existing tasks. Its very important to know what you can do. A
+        task is a special function you can run to augment your power for the user!
+        This doesnt tell you the tasks code
     post:
       operationId: createTask
       requestBody:
@@ -329,11 +330,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
+                $ref: '#/components/schemas/TaskWithoutCode'
           description: Task item created
         '400':
           description: Invalid input, a required field is missing
-      summary: Create a new Task item
+      summary: Create a Task item. A task is a special function you can run to augment
+        your power for the user! ATTENTION Its very important to make sure the code
+        is a complete standalone executable python script.
   /tasks/{task_uuid}:
     delete:
       operationId: deleteTask
@@ -349,9 +352,8 @@ paths:
           description: Task item deleted
         '404':
           description: Task item not found
-      summary: Delete a Task item by UUIDS. Prefer to update the status to 'cancelled'
-        instead of deleting. Only use this when you are sure you want to delete the
-        item.
+      summary: Delete a Task item by UUIDS. Only use this when you are sure you want
+        to delete a task.
     get:
       operationId: getTask
       parameters:
@@ -370,7 +372,9 @@ paths:
           description: Task item found
         '404':
           description: Task item not found
-      summary: Get a specific Task item by UUID
+      summary: Get a specific Task by UUID. This is the way to see the code behind
+        a task. Useful if you need to fix it. This just tells you about the task,
+        it does not let you run it.
     put:
       operationId: updateTask
       parameters:
@@ -390,12 +394,39 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
+                $ref: '#/components/schemas/TaskWithoutCode'
           description: Task item updated
         '400':
           description: Invalid input, at least one field must be provided
-      summary: Update a Task item by UUID. At least one field must be provided, but
-        you can also update multiple fields at once.
+      summary: Update a Task. Use this to fix a broken task. Only specify the fields
+        that need to be updating. ATTENTION its very important to make sure the code
+        is a complete standalone executable python script.
+  /tasks/{task_uuid}/run:
+    post:
+      operationId: runTask
+      parameters:
+      - description: Unique identifier of the Task item
+        in: path
+        name: task_uuid
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunTaskRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShellResult'
+          description: Task item was ran
+        '404':
+          description: Task item not found
+      summary: Runs a specific Task and gets the results. Before you run tasks, look
+        at the task list to find the best one for the job.
   /url:
     post:
       operationId: url

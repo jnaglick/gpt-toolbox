@@ -4,7 +4,7 @@ from utils import console
 from retrieval import DocumentRetriever
 from retrieval.extract import DocumentExtractor, FileExtractor, DirectoryExtractor, CsvFileExtractor, PythonFileExtractor, WebExtractor
 
-class PluginRetriever(DocumentRetriever):
+class ShortTermRetriever(DocumentRetriever):
     def __init__(self, db):
         super().__init__(db)
         # this looks wonky, you'd expect to see a FileExtractor here. This is because the *FileExtractor classes has the condition() in them. Fix this.
@@ -34,10 +34,16 @@ class PluginRetriever(DocumentRetriever):
         items = self.web_extractor.extract(source)
         console.verbose(f"Extracted {len(items)} items from url: {source}")
         return self.index(items)
+    
+class LongTermRetriever(DocumentRetriever):
+    def __init__(self, db):
+        super().__init__(db)
 
 def memory(server):
-    retriever = PluginRetriever(server.context.db)
-    console.log(f"Plugin Retriever initialized with {retriever.db.collection.count()} items")
+    short_term = ShortTermRetriever(db=server.context.db)
+    long_term = LongTermRetriever(db=server.context.db_long_term)
+
+    console.log(f"Plugin memory initialized. short_term: {short_term.db.collection.count()}, long_term: {long_term.db.collection.count()}")
 
     @server.route("/create_memory", methods=["POST"])
     def _create_memory():
@@ -72,16 +78,16 @@ def memory(server):
             memories = []
 
             if 'text' in request.json:
-                memories = retriever.load(request.json['text'])
+                memories = long_term.load(request.json['text'])
 
             if 'file_path' in request.json:
-                memories = retriever.load_file(request.json['file_path'])
+                memories = short_term.load_file(request.json['file_path'])
 
             if 'dir_path' in request.json:
-                memories = retriever.load_directory(request.json['dir_path'])
+                memories = short_term.load_directory(request.json['dir_path'])
 
             if 'url' in request.json:
-                memories = retriever.load_url(request.json['url'])
+                memories = short_term.load_url(request.json['url'])
 
             return jsonify({
                 "returncode": 0,
@@ -97,11 +103,11 @@ def memory(server):
     @server.route("/remember", methods=["POST"])
     def _remember():
         """
-        Remember something you memorized previously. If the user seems to be referencing something specific not in the chat history, try to find it with this. This makes you a much better assistant, so use it often!
+        Recalls important things, code and data from the local filesystem and remote locations, and your own past notes. This functionality makes you a MUCH Better Assistant, so use it as often as possible!
         ---
         post:
             operationId: remember
-            summary: Remember something you memorized previously. If the user seems to be referencing something specific not in the chat history, try to find it with this. This makes you a much better assistant, so use it often!
+            summary: Recalls important things, code and data from the local filesystem and remote locations, and your own past notes. This functionality makes you a MUCH Better Assistant, so use it as often as possible!
             requestBody:
                 content:
                     application/json:
@@ -109,7 +115,7 @@ def memory(server):
                             $ref: "#/components/schemas/RememberRequest"
             responses:
                 200:
-                    description: The memory that was found, if any. If nothing was found, try again with a much different query, or better yet, ask the user for clarification. If an error is returned, dont try again.
+                    description: The memory that was found, if any. If nothing was found, try again with a much different query.
                     content:
                         application/json:
                             schema:
@@ -118,11 +124,16 @@ def memory(server):
         if not request.json or 'query' not in request.json:
             abort(400)
 
-        result = retriever.query(request.json['query'])
+        long_term_result = long_term.query(request.json['query'], max_results=5)
+        print(long_term_result)
+        short_term_result = short_term.query(request.json['query'], max_results=5)
+        print(short_term_result)
+
+        result = long_term_result + short_term_result
 
         if len(result) == 0:
             return jsonify({
-                "document": "No results found. Try another query.",
+                "document": "No results found. ATTENTION: Please try again with a much different query.",
             })
 
         return jsonify({

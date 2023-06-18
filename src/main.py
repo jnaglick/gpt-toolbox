@@ -1,5 +1,7 @@
 from plugin import start_server
+from utils import console
 
+console.log("🧰 starting plugin server...")
 start_server()
 
 # from agents.web import WebInformedAgent

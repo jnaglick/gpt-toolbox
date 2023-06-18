@@ -1,10 +1,9 @@
 from flask import jsonify, request, abort
 
-from agents.few_shot import RelevanceSummaryAgent
 from utils import web_search
 
-def search_action(search_term, agent):
-    search_results = web_search(search_term, num_results=5, relevance_summary_fn=agent.prediction)
+def search_action(search_term, relevance_summary_agent):
+    search_results = web_search(search_term, num_results=8, relevance_summary_fn=relevance_summary_agent.prediction)
 
     return [
         {
@@ -15,7 +14,7 @@ def search_action(search_term, agent):
     ]
 
 def search(server):
-    relevance_summary_agent = RelevanceSummaryAgent("plugin /search")
+    relevance_summary_agent = server.context.agents['relevance_summary']
 
     @server.route('/search', methods=['POST'])
     def _search():
