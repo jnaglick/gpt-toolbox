@@ -315,8 +315,8 @@ paths:
         '400':
           description: Invalid input, a required field is missing
       summary: Run a shell command on the user's machine and get the results. This
-        can be used for many different things - get creative (Hint, store results
-        using the tasks API and then retrieve them later!)
+        can be used for many different things - get creative! ATTENTION NEVER Use
+        This To Edit Files - Always Use the vim_ex tool!
   /tasks:
     get:
       operationId: listTasks
@@ -326,12 +326,10 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/TaskWithoutCode'
+                  $ref: '#/components/schemas/Task'
                 type: array
-          description: List of Tasks without code.
-      summary: Lists existing tasks. Its very important to know what you can do. A
-        task is a special function you can run to augment your power for the user!
-        This doesnt tell you the tasks code
+          description: List of Task items
+      summary: List all Task items
     post:
       operationId: createTask
       requestBody:
@@ -344,13 +342,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TaskWithoutCode'
+                $ref: '#/components/schemas/Task'
           description: Task item created
         '400':
           description: Invalid input, a required field is missing
-      summary: Create a Task item. A task is a special function you can run to augment
-        your power for the user! ATTENTION Its very important to make sure the code
-        is a complete standalone executable python script.
+      summary: Create a new Task item
   /tasks/{task_uuid}:
     delete:
       operationId: deleteTask
@@ -366,8 +362,9 @@ paths:
           description: Task item deleted
         '404':
           description: Task item not found
-      summary: Delete a Task item by UUIDS. Only use this when you are sure you want
-        to delete a task.
+      summary: Delete a Task item by UUIDS. Prefer to update the status to 'cancelled'
+        instead of deleting. Only use this when you are sure you want to delete the
+        item.
     get:
       operationId: getTask
       parameters:
@@ -386,9 +383,7 @@ paths:
           description: Task item found
         '404':
           description: Task item not found
-      summary: Get a specific Task by UUID. This is the way to see the code behind
-        a task. Useful if you need to fix it. This just tells you about the task,
-        it does not let you run it.
+      summary: Get a specific Task item by UUID
     put:
       operationId: updateTask
       parameters:
@@ -408,39 +403,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TaskWithoutCode'
+                $ref: '#/components/schemas/Task'
           description: Task item updated
         '400':
           description: Invalid input, at least one field must be provided
-      summary: Update a Task. Use this to fix a broken task. Only specify the fields
-        that need to be updating. ATTENTION its very important to make sure the code
-        is a complete standalone executable python script.
-  /tasks/{task_uuid}/run:
-    post:
-      operationId: runTask
-      parameters:
-      - description: Unique identifier of the Task item
-        in: path
-        name: task_uuid
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RunTaskRequest'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ShellResult'
-          description: Task item was ran
-        '404':
-          description: Task item not found
-      summary: Runs a specific Task and gets the results. Before you run tasks, look
-        at the task list to find the best one for the job.
+      summary: Update a Task item by UUID. At least one field must be provided, but
+        you can also update multiple fields at once.
   /url:
     post:
       operationId: url
@@ -460,5 +428,28 @@ paths:
           description: Invalid input, a required field is missing
       summary: Look up something on the web. This will access the url and return the
         results.
+  /vim_ex:
+    post:
+      operationId: vim_ex
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VimExRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ShellResult'
+                type: array
+          description: Vim Ex mode result
+        '400':
+          description: Invalid input. The request must be a JSON and contain 'commands'`
+            and 'file_name' fields.
+      summary: Run a series of Vim commands in Ex mode on the user's machine and get
+        the results (the final "wq" is supplied automatically). ATTENTION ALWAYS Use
+        This To Edit Files - NEVER Use the Shell Tool!
 servers:
 - url: http://localhost:3333

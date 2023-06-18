@@ -9,7 +9,7 @@ def shell(server):
         ---
         post:
             operationId: shell
-            summary: Run a shell command on the user's machine and get the results. This can be used for many different things - get creative (Hint, store results using the tasks API and then retrieve them later!)
+            summary: Run a shell command on the user's machine and get the results. This can be used for many different things - get creative! ATTENTION NEVER Use This To Edit Files - Always Use the vim_ex tool!
             requestBody:
                 content:
                     application/json:

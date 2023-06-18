@@ -9,7 +9,7 @@ def vim_ex(server):
         ---
         post:
             operationId: vim_ex
-            summary: Run a series of Vim commands in Ex mode on the user's machine and get the results.
+            summary: Run a series of Vim commands in Ex mode on the user's machine and get the results (the final "wq" is supplied automatically). ATTENTION ALWAYS Use This To Edit Files - NEVER Use the Shell Tool!
             requestBody:
                 content:
                     application/json:
@@ -25,13 +25,13 @@ def vim_ex(server):
                                 items:
                                     $ref: '#/components/schemas/ShellResult'
                 400:
-                    description: Invalid input, a required field is missing
+                    description: Invalid input. The request must be a JSON and contain 'commands' and 'file_name' fields.
         """
-        if not request.json or 'commands' not in request.json or 'file' not in request.json:
+        if not request.json or 'commands' not in request.json or 'file_name' not in request.json:
             abort(400)
 
         vim_commands = ' '.join(f'-c "{command}"' for command in request.json["commands"])
-        vim_command = f'vim -es -u NONE {vim_commands} -c "wq" {request.json["file"]}'
+        vim_command = f'vim -es -u NONE {vim_commands} -c "wq" {request.json["file_name"]}'
         return jsonify(run_shell_command(vim_command)), 200
   
     return _vim_ex
