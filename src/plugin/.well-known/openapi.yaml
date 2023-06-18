@@ -298,7 +298,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/ShellResult'
                 type: array
-          description: Search result
+          description: Shell result
         '400':
           description: Invalid input, a required field is missing
       summary: Run a shell command on the user's machine and get the results. This
