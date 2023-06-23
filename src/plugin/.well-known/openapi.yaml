@@ -33,6 +33,50 @@ components:
       - notes
       - task
       type: object
+    EditLineRequest:
+      properties:
+        file_name:
+          description: The full path of the file to operate on.
+          type: string
+        line_number:
+          description: The line number to update. ALWAYS view_file to check line nums
+            1st!
+          type: integer
+        new_text:
+          description: The text to update the line to. Always Preserve Whitespace.
+          type: string
+      required:
+      - file_name
+      - line_number
+      - new_text
+      type: object
+    FileView:
+      properties:
+        error:
+          description: The error that happened when reading the file, if any.
+          type: string
+        file_contents:
+          description: An array of arrays of strings. Represents lines in the file.
+            Each array is a line, index 0 is the line number, index 1 is the line
+            text.
+          items:
+            description: An array of strings. Represents a line in the file, index
+              0 is the line number, index 1 is the line text.
+            items:
+              type: string
+            type: array
+          type: array
+      required:
+      - file_contents
+      type: object
+    FileViewRequest:
+      properties:
+        file_name:
+          description: The full path of the file to view.
+          type: string
+      required:
+      - file_name
+      type: object
     MemorizeRequest:
       properties:
         dir_path:
@@ -278,18 +322,16 @@ components:
       type: object
     VimExRequest:
       properties:
-        commands:
-          description: The Vim Ex mode commands (max=9) to run on the users machine.
-            ATTENTION Regular Expressions Do NOT Work. Instead, ALWAYS Update Entire
-            Lines By Using `:<line_number>put ='<text>'`
-          items:
-            type: string
-          type: array
+        command:
+          description: The Vim Ex mode command to run on the file. ATTENTION Think
+            Carefully To Keep Commands Simple! Use very few special characters. Escaping
+            Done Server-Side.
+          type: string
         file_name:
-          description: The file name to operate on.
+          description: The full path of the file to operate on.
           type: string
       required:
-      - commands
+      - command
       - file_name
       type: object
 info:
@@ -316,32 +358,71 @@ paths:
       summary: Memorizes something. It's very important to use the right request param
         so the system knows how to memorize it. Before you memorize, think step by
         step about exactly what to memorize and how.
-  /datetime:
-    get:
-      operationId: datetime
+  /edit/insert_line:
+    post:
+      operationId: edit_insert_line
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditLineRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                description: The current datetime in the user's local timezone.
-                type: string
-          description: The current datetime in the user's local timezone.
-      summary: Get the current datetime in the user's local timezone. Before answering
-        questions related to the current datetime, you can use this to know it exactly
-        in order to give a better answer.
-  /random-number:
-    get:
-      operationId: random_number
+                $ref: '#/components/schemas/FileView'
+          description: Line Insert result, how the file looks after the insert
+        '400':
+          description: Invalid input. ATTENTION Double check escape sequences in new_text!
+            The request must be a JSON and contain 'line_number', 'new_text', 'file_name'
+            fields.
+      summary: EASIEST way to edit! Inserts new_text in file_name at line_number,
+        moving other lines down. ALWAYS view_file to check line nums 1st! NEVER Use
+        the Shell Tool To Edit!
+  /edit/replace_line:
+    post:
+      operationId: edit_replace_line
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditLineRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
-                description: A random integer between 1 and 100.
-                type: integer
-          description: A random integer between 1 and 100.
-      summary: Get a random integer between 1 and 100.
+                $ref: '#/components/schemas/FileView'
+          description: Line Update result, how the file looks after the update
+        '400':
+          description: Invalid input. ATTENTION Double check escape sequences in new_text!
+            The request must be a JSON and contain 'line_number', 'new_text', 'file_name'
+            fields.
+      summary: EASIEST way to edit! Writes new_text to file_name at line_number, replacing
+        the text on that line, moving other lines down. ALWAYS view_file to check
+        line nums 1st! NEVER Use the Shell Tool To Edit!
+  /edit/view_file:
+    post:
+      operationId: edit_view_file
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileViewRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileView'
+          description: Vim View result - always check line numbers with this before
+            editing!
+        '400':
+          description: Invalid input. The request must be a JSON and contain 'file_name'
+            field.
+      summary: ATTENTION Its Dangerous To Edit A File Without Looking At It First!
+        ALWAYS use this before editing a file to check line nums 1st!
   /remember:
     post:
       operationId: remember
@@ -395,15 +476,13 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/ShellResult'
-                type: array
+                $ref: '#/components/schemas/ShellResult'
           description: Shell result
         '400':
           description: Invalid input, a required field is missing
-      summary: Run a shell command on the user's machine and get the results. This
+      summary: Run a shell command on the user's machine and see the results. This
         can be used for many different things - get creative! ATTENTION NEVER Use
-        This To Edit Files - Always Use the vim_ex tool!
+        This To Edit Files - Always Try Use line_update Instead!
   /tasks:
     get:
       operationId: listTasks
@@ -560,15 +639,13 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/ShellResult'
-                type: array
+                $ref: '#/components/schemas/ShellResult'
           description: Vim Ex mode result
         '400':
-          description: Invalid input. The request must be a JSON and contain 'commands'
+          description: Invalid input. The request must be a JSON and contain 'command'
             and 'file_name' fields.
-      summary: Run Vim commands in Ex mode (Regular Expressions Disabled) on the user's
-        machine (the final -c "wq" is supplied automatically). ATTENTION ALWAYS Use
-        This To Edit Files - NEVER Use the Shell Tool!
+      summary: Run Vim command in Ex mode a file (final -c "wq" is implied) ALWAYS
+        view_file to check line nums 1st! ONLY USE WHEN you cannot use a simpler edit_*
+        tool
 servers:
 - url: http://localhost:3333

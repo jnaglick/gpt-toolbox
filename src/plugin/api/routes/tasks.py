@@ -1,3 +1,4 @@
+import redis
 import uuid
 
 from flask import jsonify, request, abort
@@ -14,13 +15,16 @@ def create_task_script(code, task_uuid):
 
 class TaskService:
     def __init__(self):
-        self.tasks = {}
+        self.redis = redis.Redis(host='localhost', port=6379, db=0)
 
     def get_all_tasks(self):
-        return [{k: v for k, v in task.items() if k != 'code'} for task in self.tasks.values()]
+        keys = self.redis.keys()
+        tasks = self.redis.mget(keys)
+        return [{k: v for k, v in json.loads(task.decode('utf-8')).items() if k != 'code'} for task in tasks]
 
     def get_task(self, task_uuid):
-        return self.tasks.get(task_uuid)
+        task = self.redis.get(task_uuid)
+        return json.loads(task.decode('utf-8')) if task else None
 
     def create_task(self, task_data):
         task_uuid = str(uuid.uuid4())
@@ -34,12 +38,13 @@ class TaskService:
             'notes': task_data['notes'],
             'code': task_data['code'],
         }
-        self.tasks[task_uuid] = item
+        self.redis.set(task_uuid, json.dumps(item))
         
         return {k: v for k, v in item.items() if k != 'code'}
 
     def update_task(self, task_uuid, task_data):
-        item = self.tasks.get(task_uuid)
+        item = self.redis.get(task_uuid)
+        item = json.loads(item.decode('utf-8')) if item else None
         if item is None:
             return None
 
@@ -49,14 +54,14 @@ class TaskService:
         item['task'] = task_data.get('task', item['task'])
         item['desc'] = task_data.get('desc', item['desc'])
         item['notes'] = task_data.get('notes', item['notes'])
-        item['code'] = task_data.get('code', item['code'])
+        self.redis.set(task_uuid, json.dumps(item))
         self.tasks[task_uuid] = item
 
         return {k: v for k, v in item.items() if k != 'code'}
 
     def delete_task(self, task_uuid):
-        if task_uuid in self.tasks:
-            del self.tasks[task_uuid]
+        if self.redis.exists(task_uuid):
+            self.redis.delete(task_uuid)
             return True
         return False
     

@@ -9,7 +9,7 @@ def shell(server):
         ---
         post:
             operationId: shell
-            summary: Run a shell command on the user's machine and get the results. This can be used for many different things - get creative! ATTENTION NEVER Use This To Edit Files - Always Use the vim_ex tool!
+            summary: Run a shell command on the user's machine and see the results. This can be used for many different things - get creative! ATTENTION NEVER Use This To Edit Files - Always Try Use line_update Instead!
             requestBody:
                 content:
                     application/json:
@@ -21,9 +21,7 @@ def shell(server):
                     content:
                         application/json:
                             schema:
-                                type: array
-                                items:
-                                    $ref: '#/components/schemas/ShellResult'
+                                $ref: '#/components/schemas/ShellResult'
                 400:
                     description: Invalid input, a required field is missing
         """
