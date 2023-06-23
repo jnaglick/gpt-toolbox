@@ -85,8 +85,27 @@ class RememberResult(Schema):
     metadata = fields.Dict(required=True, description="Metadata about the document. Contains *Very Useful Information* about the result (eg, where to find the code). Read it carefully to extract good information from this yourself.")
 
 class VimExRequest(Schema):
-    commands = fields.List(fields.String(), required=True, description="The Vim Ex mode commands to run on the users machine. ATTN! editing lines with %s// has a very high environment cost. ALWAYS Use Multiple delete+inserts (del Nth line, command sep, ins Nth line)")
-    file_name = fields.String(required=True, description="The file name to operate on.") # Edit made by human
+    command = fields.String(required=True, description="The Vim Ex mode command to run on the file. ATTENTION Think Carefully To Keep Commands Simple! Use very few special characters. Escaping Done Server-Side.")
+    file_name = fields.String(required=True, description="The full path of the file to operate on.")
+
+# class VimLinePutUpdate(Schema):
+#     n = fields.Integer(required=True, description="The line number to update. ATTENTION Always Make Sure This Is Correct First By Checking vim_view")
+#     t = fields.String(required=True, description="The line text to update the line to. Always Preserve Whitespace.")
+
+class EditLineRequest(Schema):
+    # updates = fields.List(fields.Nested(VimLinePutUpdate), required=True, description="List of updates (MAX=8) to make. Each item MUST be an obj with keys 'n' (line number) and 't' (line_text) ATTENTION Escaping Done Server-Side. ALWAYS preserve whitespace.")
+    line_number = fields.Integer(required=True, description="The line number to update. ALWAYS view_file to check line nums 1st!")
+    new_text = fields.String(required=True, description="The text to update the line to. Always Preserve Whitespace.")
+    file_name = fields.String(required=True, description="The full path of the file to operate on.")
+
+class FileViewRequest(Schema):
+    file_name = fields.String(required=True, description="The full path of the file to view.")
+
+class FileView(Schema):
+    file_contents = fields.List(
+        fields.List(fields.String(), description="An array of strings. Represents a line in the file, index 0 is the line number, index 1 is the line text."
+    ), required=True, description="An array of arrays of strings. Represents lines in the file. Each array is a line, index 0 is the line number, index 1 is the line text.")
+    error = fields.String(required=False, description="The error that happened when reading the file, if any.")
 
 components = [
     Task, 
@@ -105,4 +124,8 @@ components = [
     RememberRequest,
     RememberResult,
     VimExRequest,
+    # VimLinePutUpdate,
+    EditLineRequest,
+    FileViewRequest,
+    FileView
 ]

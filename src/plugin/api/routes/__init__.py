@@ -1,19 +1,21 @@
-from .datetime import datetime
+# from .datetime import datetime
+from .edit import edit_routes
 from .tasks import task_routes
 from .search import search
 from .shell import shell
 from .url import url
-from .random_number import random_number
+# from .random_number import random_number
 from .memory import memory 
-from .vim_ex import vim_ex
+from .vim import vim
 
 routes = [
-    datetime,
+    # datetime,
+    *edit_routes,
     *task_routes,
     search,
     shell,
     url,
-    random_number,
+    # random_number,
     memory,
-    vim_ex,
+    vim,
 ]

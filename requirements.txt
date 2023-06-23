@@ -18,6 +18,7 @@ flask>=2.3.1
 flask-cors>=3.0.10
 marshmallow>=3.19.0
 pyyaml>=6.0
+redis>=4.5.5
 
 # for notebooks:
 ipykernel>=6.22.0

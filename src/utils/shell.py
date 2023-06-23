@@ -1,5 +1,7 @@
 import subprocess
 
+from utils import console
+
 def run_shell_command(command, shell="/bin/zsh"):
     output = {
         "stdout": None,
@@ -18,8 +20,9 @@ def run_shell_command(command, shell="/bin/zsh"):
         
         output["returncode"] = result.returncode
     except subprocess.CalledProcessError as e:
-        # Capture the standard error output from the exception
-        output["stderr"] = e.stderr
+        console.error(f"Error running shell command: {e} - {e.cmd}")
+
+        output["stderr"] = e.stderr or f"{e}"
         output["returncode"] = e.returncode
 
     return output
