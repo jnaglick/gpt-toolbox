@@ -9,7 +9,7 @@ def shell(server):
         ---
         post:
             operationId: shell
-            summary: Run a shell command on the user's machine and see the results. This can be used for many different things - get creative! ATTENTION NEVER Use This To Edit Files - Always Try Use line_update Instead!
+            summary: Run a shell command on the user's machine and see the results. This can be used for many different things - get creative! ATTENTION NEVER Use This To Edit Files - Always Try Using edit_* Instead!
             requestBody:
                 content:
                     application/json:

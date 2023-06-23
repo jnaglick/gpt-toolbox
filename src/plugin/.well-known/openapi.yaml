@@ -482,7 +482,7 @@ paths:
           description: Invalid input, a required field is missing
       summary: Run a shell command on the user's machine and see the results. This
         can be used for many different things - get creative! ATTENTION NEVER Use
-        This To Edit Files - Always Try Use line_update Instead!
+        This To Edit Files - Always Try Using edit_* Instead!
   /tasks:
     get:
       operationId: listTasks
