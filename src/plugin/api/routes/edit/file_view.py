@@ -4,12 +4,12 @@ from utils import console
 from .helpers import get_file_view
 
 def file_view(server):
-    @server.route('/edit/view_file', methods=['POST'])
+    @server.route('/edit/file_view', methods=['POST'])
     def _file_view():
         """
         ---
         post:
-            operationId: edit_view_file
+            operationId: file_view
             summary: ATTENTION Its Dangerous To Edit A File Without Looking At It First! ALWAYS use this before editing a file to check line nums 1st!
             requestBody:
                 content:

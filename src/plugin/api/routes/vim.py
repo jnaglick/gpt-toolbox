@@ -34,7 +34,7 @@ def vim(server):
         ---
         post:
             operationId: vim_ex
-            summary: Run Vim command in Ex mode a file (final -c "wq" is implied) ALWAYS view_file to check line nums 1st! ONLY USE WHEN you cannot use a simpler edit_* tool
+            summary: Run Vim command in Ex mode a file (final -c "wq" is implied) ALWAYS file_view to check line nums 1st! ONLY USE WHEN you cannot use a simpler edit_* tool
             requestBody:
                 content:
                     application/json:

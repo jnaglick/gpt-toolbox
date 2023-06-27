@@ -88,15 +88,14 @@ class VimExRequest(Schema):
     command = fields.String(required=True, description="The Vim Ex mode command to run on the file. ATTENTION Think Carefully To Keep Commands Simple! Use very few special characters. Escaping Done Server-Side.")
     file_name = fields.String(required=True, description="The full path of the file to operate on.")
 
-# class VimLinePutUpdate(Schema):
-#     n = fields.Integer(required=True, description="The line number to update. ATTENTION Always Make Sure This Is Correct First By Checking vim_view")
-#     t = fields.String(required=True, description="The line text to update the line to. Always Preserve Whitespace.")
+class FileEditOperation(Schema):
+    op = fields.String(required=True, description="Must be one: 'replace' 'insert' 'delete'. 'replace' replaces the line with the new text. 'insert' inserts the new text on the line. 'delete' deletes the line. ALWAYS preserve whitespace.")
+    line_number = fields.Integer(required=True, description="The line number to perform the operation on. ALWAYS file_view to check line nums 1st!")
+    new_text = fields.String(required=False, description="The text to put in the line. Only required for 'replace' and 'insert' operations. ALWAYS preserve whitespace.")
 
-class EditLineRequest(Schema):
-    # updates = fields.List(fields.Nested(VimLinePutUpdate), required=True, description="List of updates (MAX=8) to make. Each item MUST be an obj with keys 'n' (line number) and 't' (line_text) ATTENTION Escaping Done Server-Side. ALWAYS preserve whitespace.")
-    line_number = fields.Integer(required=True, description="The line number to update. ALWAYS view_file to check line nums 1st!")
-    new_text = fields.String(required=True, description="The text to update the line to. Always Preserve Whitespace.")
-    file_name = fields.String(required=True, description="The full path of the file to operate on.")
+class FileEditRequest(Schema):
+    file_name = fields.String(required=True, description="The full path of the file to edit. ALWAYS file_view to check line nums 1st!")
+    operations = fields.List(fields.Nested(FileEditOperation), required=True, description="List of edit operations to perform on the file. Each item MUST be an obj with keys 'op' 'line_number' and 'new_text' (if required by op). ALWAYS file_view to check line nums 1st!")
 
 class FileViewRequest(Schema):
     file_name = fields.String(required=True, description="The full path of the file to view.")
@@ -124,8 +123,8 @@ components = [
     RememberRequest,
     RememberResult,
     VimExRequest,
-    # VimLinePutUpdate,
-    EditLineRequest,
+    FileEditOperation,
+    FileEditRequest,
     FileViewRequest,
     FileView
 ]

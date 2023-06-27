@@ -33,22 +33,41 @@ components:
       - notes
       - task
       type: object
-    EditLineRequest:
+    FileEditOperation:
       properties:
-        file_name:
-          description: The full path of the file to operate on.
-          type: string
         line_number:
-          description: The line number to update. ALWAYS view_file to check line nums
-            1st!
+          description: The line number to perform the operation on. ALWAYS file_view
+            to check line nums 1st!
           type: integer
         new_text:
-          description: The text to update the line to. Always Preserve Whitespace.
+          description: The text to put in the line. Only required for 'replace' and
+            'insert' operations. ALWAYS preserve whitespace.
+          type: string
+        op:
+          description: 'Must be one: ''replace'' ''insert'' ''delete''. ''replace''
+            replaces the line with the new text. ''insert'' inserts the new text on
+            the line. ''delete'' deletes the line. ALWAYS preserve whitespace.'
           type: string
       required:
-      - file_name
       - line_number
-      - new_text
+      - op
+      type: object
+    FileEditRequest:
+      properties:
+        file_name:
+          description: The full path of the file to edit. ALWAYS file_view to check
+            line nums 1st!
+          type: string
+        operations:
+          description: List of edit operations to perform on the file. Each item MUST
+            be an obj with keys 'op' 'line_number' and 'new_text' (if required by
+            op). ALWAYS file_view to check line nums 1st!
+          items:
+            $ref: '#/components/schemas/FileEditOperation'
+          type: array
+      required:
+      - file_name
+      - operations
       type: object
     FileView:
       properties:
@@ -358,53 +377,29 @@ paths:
       summary: Memorizes something. It's very important to use the right request param
         so the system knows how to memorize it. Before you memorize, think step by
         step about exactly what to memorize and how.
-  /edit/insert_line:
+  /edit/file_edit:
     post:
-      operationId: edit_insert_line
+      operationId: file_edit
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EditLineRequest'
+              $ref: '#/components/schemas/FileEditRequest'
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FileView'
-          description: Line Insert result, how the file looks after the insert
+          description: File Edit result, how the file looks after the edit
         '400':
-          description: Invalid input. ATTENTION Double check escape sequences in new_text!
-            The request must be a JSON and contain 'line_number', 'new_text', 'file_name'
-            fields.
-      summary: EASIEST way to edit! Inserts new_text in file_name at line_number,
-        moving other lines down. ALWAYS view_file to check line nums 1st! NEVER Use
-        the Shell Tool To Edit!
-  /edit/replace_line:
+          description: Invalid input. The request must be a JSON and contain 'file_name',
+            'operations' fields.
+      summary: Edit a file with multiple operations. Each operation can be a replace,
+        insert, or delete. ALWAYS file_view to check line nums 1st!
+  /edit/file_view:
     post:
-      operationId: edit_replace_line
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EditLineRequest'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FileView'
-          description: Line Update result, how the file looks after the update
-        '400':
-          description: Invalid input. ATTENTION Double check escape sequences in new_text!
-            The request must be a JSON and contain 'line_number', 'new_text', 'file_name'
-            fields.
-      summary: EASIEST way to edit! Writes new_text to file_name at line_number, replacing
-        the text on that line, moving other lines down. ALWAYS view_file to check
-        line nums 1st! NEVER Use the Shell Tool To Edit!
-  /edit/view_file:
-    post:
-      operationId: edit_view_file
+      operationId: file_view
       requestBody:
         content:
           application/json:
@@ -645,7 +640,7 @@ paths:
           description: Invalid input. The request must be a JSON and contain 'command'
             and 'file_name' fields.
       summary: Run Vim command in Ex mode a file (final -c "wq" is implied) ALWAYS
-        view_file to check line nums 1st! ONLY USE WHEN you cannot use a simpler edit_*
+        file_view to check line nums 1st! ONLY USE WHEN you cannot use a simpler edit_*
         tool
 servers:
 - url: http://localhost:3333
