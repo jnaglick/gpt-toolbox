@@ -12,7 +12,10 @@ def make_request(url):
     return response.text
 
 def web_request(url, apply_soup=True, remove_symbols=False, collapse_whitespace=True):
-        response = make_request(url)
+        try:
+            response = make_request(url)
+        except:
+            return ""
 
         if apply_soup:
             response = BeautifulSoup(response, 'html.parser').get_text()
