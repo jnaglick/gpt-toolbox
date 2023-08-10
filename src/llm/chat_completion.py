@@ -49,7 +49,7 @@ def chat_completion_token_counts(system, examples, user, model: ModelType):
         "model_max": get_model_spec(model)["max_tokens"]
     }
 
-def chat_completion(system, examples, user, model=ModelType.GPT_3_5_TURBO):
+def chat_completion(system, examples, user, model=ModelType.GPT_4):
     try:
         model_spec = get_model_spec(model)
 

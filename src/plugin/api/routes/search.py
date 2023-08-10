@@ -1,9 +1,10 @@
 from flask import jsonify, request, abort
 
+from llm import ModelType
 from utils import web_search
 
-def search_action(search_term, relevance_summary_agent):
-    search_results = web_search(search_term, num_results=8, relevance_summary_fn=relevance_summary_agent.prediction)
+def search_action(search_term, relevance_summary_fn):
+    search_results = web_search(search_term, num_results=8, relevance_summary_fn=relevance_summary_fn)
 
     return [
         {
@@ -15,6 +16,9 @@ def search_action(search_term, relevance_summary_agent):
 
 def search(server):
     relevance_summary_agent = server.context.agents['relevance_summary']
+
+    def relevance_summary_fn(query, text):
+        return relevance_summary_agent.prediction(query, text, model=ModelType.GPT_3_5_TURBO_16K)
 
     @server.route('/search', methods=['POST'])
     def _search():
@@ -43,6 +47,6 @@ def search(server):
         if not request.json or 'query' not in request.json:
             abort(400)
 
-        return jsonify(search_action(request.json['query'], relevance_summary_agent)), 200
+        return jsonify(search_action(request.json['query'], relevance_summary_fn)), 200
   
     return _search
